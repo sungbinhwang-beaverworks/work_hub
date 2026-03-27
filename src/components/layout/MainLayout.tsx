@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import OfficeMap from "@/components/office_map/OfficeMap";
-import ChatPanel from "@/components/chat/ChatPanel";
+import dynamic from "next/dynamic";
+
+const PixiOfficeCanvas = dynamic(() => import("@/components/pixi/PixiOfficeCanvas"), { ssr: false });
+import ChatOverlay from "@/components/overlay/ChatOverlay";
+import OfficeHUD from "@/components/overlay/OfficeHUD";
 import type { AgentInfo, ChatMessage } from "@/lib/agents/types";
 import { supabase } from "@/lib/supabase";
 
@@ -13,6 +16,7 @@ export default function MainLayout() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [streamingText, setStreamingText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // 에이전트별 대화 ID 캐시
   const [convCache, setConvCache] = useState<Record<string, string>>({});
@@ -43,7 +47,6 @@ export default function MainLayout() {
         "postgres_changes",
         { event: "*", schema: "public", table: "hub_agents" },
         () => {
-          // 에이전트 상태 변경 시 전체 목록 새로고침
           loadAgents();
         }
       )
@@ -58,12 +61,11 @@ export default function MainLayout() {
   const handleSelectAgent = useCallback(
     async (agentId: string) => {
       setSelectedAgentId(agentId);
+      setIsChatOpen(true);
 
-      // 캐시된 대화 ID가 있으면 메시지 로드
       const cachedConvId = convCache[agentId];
       if (cachedConvId) {
         setConversationId(cachedConvId);
-        // 기존 대화 메시지 로드
         try {
           const { data } = await supabase
             .from("hub_messages")
@@ -83,6 +85,11 @@ export default function MainLayout() {
     [convCache]
   );
 
+  // 채팅 오버레이 닫기
+  const handleCloseChat = useCallback(() => {
+    setIsChatOpen(false);
+  }, []);
+
   // 메시지 전송
   const handleSendMessage = useCallback(
     async (message: string) => {
@@ -91,7 +98,6 @@ export default function MainLayout() {
       setIsStreaming(true);
       setStreamingText("");
 
-      // 사용자 메시지를 UI에 즉시 추가 (낙관적 업데이트)
       const tempUserMsg: ChatMessage = {
         id: `temp-${Date.now()}`,
         conversation_id: conversationId || "",
@@ -140,7 +146,6 @@ export default function MainLayout() {
               }
 
               if (data.done && data.conversation_id) {
-                // 대화 ID 캐시 업데이트
                 const newConvId = data.conversation_id;
                 setConversationId(newConvId);
                 setConvCache((prev) => ({
@@ -148,7 +153,6 @@ export default function MainLayout() {
                   [selectedAgentId]: newConvId,
                 }));
 
-                // 스트리밍 완료: 어시스턴트 메시지를 목록에 추가
                 const assistantMsg: ChatMessage = {
                   id: `assistant-${Date.now()}`,
                   conversation_id: newConvId,
@@ -164,7 +168,7 @@ export default function MainLayout() {
                 console.error("Stream error:", data.error);
               }
             } catch {
-              // JSON 파싱 실패는 무시 (불완전한 chunk)
+              // JSON 파싱 실패는 무시
             }
           }
         }
@@ -180,73 +184,29 @@ export default function MainLayout() {
 
   const selectedAgent = agents.find((a) => a.id === selectedAgentId) || null;
 
-  // 활동 중인 에이전트 수
-  const workingAgents = agents.filter((a) => a.status === "working");
-
   return (
-    <div className="flex flex-col h-screen">
-      {/* 헤더 */}
-      <header
-        className="flex items-center justify-between"
-        style={{
-          padding: "var(--space-3) var(--space-6)",
-          borderBottom: "1px solid var(--color-divider)",
-          backgroundColor: "var(--color-bg-surface)",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "var(--fs-lg)",
-            fontWeight: "var(--fw-semibold)",
-            color: "var(--color-typo-title)",
-          }}
-        >
-          Work Hub
-        </h1>
-        <div
-          style={{
-            fontSize: "var(--fs-xs)",
-            color: "var(--color-typo-subtitle)",
-          }}
-        >
-          {workingAgents.length > 0
-            ? `활동 중: ${workingAgents.map((a) => `${a.name} (작업 중)`).join(", ")}`
-            : "모든 에이전트 대기 중"}
-        </div>
-      </header>
+    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}>
+      {/* 2D 오피스 캔버스 (전체 화면) */}
+      <PixiOfficeCanvas
+        agents={agents}
+        selectedAgentId={selectedAgentId}
+        onSelectAgent={handleSelectAgent}
+      />
 
-      {/* 메인 영역: 오피스 맵 (좌측) + 채팅 패널 (우측) */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* 오피스 맵 (40%) */}
-        <div
-          style={{
-            width: "40%",
-            minWidth: 320,
-            borderRight: "1px solid var(--color-divider)",
-            backgroundColor: "var(--color-bg-surface)",
-          }}
-        >
-          <OfficeMap
-            agents={agents}
-            selectedAgentId={selectedAgentId}
-            onSelectAgent={handleSelectAgent}
-          />
-        </div>
+      {/* HUD 오버레이 */}
+      <OfficeHUD agents={agents} />
 
-        {/* 채팅 패널 (60%) */}
-        <div
-          className="flex-1"
-          style={{ backgroundColor: "var(--color-bg-surface)" }}
-        >
-          <ChatPanel
-            agent={selectedAgent}
-            messages={messages}
-            streamingText={streamingText}
-            isStreaming={isStreaming}
-            onSendMessage={handleSendMessage}
-          />
-        </div>
-      </div>
+      {/* 채팅 오버레이 */}
+      {isChatOpen && selectedAgent && (
+        <ChatOverlay
+          agent={selectedAgent}
+          messages={messages}
+          streamingText={streamingText}
+          isStreaming={isStreaming}
+          onSendMessage={handleSendMessage}
+          onClose={handleCloseChat}
+        />
+      )}
     </div>
   );
 }
