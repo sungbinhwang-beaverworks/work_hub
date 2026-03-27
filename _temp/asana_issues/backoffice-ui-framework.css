@@ -1,0 +1,1454 @@
+/*
+ * BeaverWorks Backoffice UI Framework
+ * 분석 기반 순수 CSS 프레임워크 (2026-03-27)
+ * 용도: spec HTML 작성 시 import하여 백오피스 실제 UI를 재현
+ *
+ * 사용법 (HTML <head>에 추가):
+ *
+ *   <!-- 폰트: Pretendard Variable -->
+ *   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+ *
+ *   <!-- 아이콘: Ant Design Icons (CDN) -->
+ *   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ant-design/icons-svg@4.4.2/lib/index.min.css">
+ *
+ *   <!-- 아이콘: Remixicon (CDN) -->
+ *   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css">
+ *
+ *   <!-- UI 프레임워크 -->
+ *   <link rel="stylesheet" href="backoffice-ui-framework.css">
+ *
+ * 로고 이미지 경로:
+ *   assets/images/header_logo_white.png      (기본 헤더 로고)
+ *   assets/images/header_logo_white_skb.png   (SK broadband 헤더 로고)
+ *   assets/images/header_logo.png             (일반 로고)
+ *   assets/images/beaver_lab_logo.png         (비버매장연구소 로고)
+ */
+
+/* ============================================================
+   1. CSS VARIABLES (Design Tokens)
+   ============================================================ */
+
+:root {
+  /* --- Primary Colors --- */
+  --primary-main: #286EF0;
+  --primary-p100: #EAF1FE;
+  --primary-p200: #D4E2FC;
+  --primary-p300: #BFD4FB;
+  --primary-p400: #A9C5F9;
+  --primary-p500: #93B6F7;
+  --primary-p600: #7EA8F6;
+  --primary-p700: #699AF5;
+  --primary-p800: #538BF3;
+  --primary-p900: #3E7DF2;
+  --primary-pb100: #306FE3;
+  --primary-pb200: #2E69D6;
+  --primary-pb300: #2A61C6;
+  --primary-pb400: #2758B4;
+  --primary-pb500: #234E9F;
+  --primary-pb600: #1F458D;
+  --primary-pb700: #1A3A75;
+  --primary-pb800: #132C58;
+  --primary-pb900: #0A1830;
+
+  /* --- Secondary Colors --- */
+  --secondary: #597EF7;
+  --secondary-s100: #F3F6FE;
+  --secondary-s200: #D6DDF5;
+  --secondary-s500: #A7B9F6;
+  --secondary-s800: #7896F7;
+
+  /* --- Gray Scale --- */
+  --gray-1: #F9FAFC;
+  --gray-2: #EFF1F4;
+  --gray-3: #E4E6EA;
+  --gray-4: #D5D8DC;
+  --gray-5: #BEC1C7;
+  --gray-6: #9DA0A8;
+  --gray-7: #7F828C;
+  --gray-8: #5A5E6A;
+  --gray-9: #3B3F4A;
+  --black: #000000;
+  --white: #FFFFFF;
+
+  /* --- System Colors --- */
+  --success: #2FB916;
+  --caution: #F9A825;
+  --info: #0081EF;
+  --error: #E03028;
+
+  /* --- Etc Colors --- */
+  --active-star: #FADB14;
+  --theborn: #001F60;
+
+  /* --- Error/Information Colors --- */
+  --error-bg: #FCEBEA;
+  --error-border: #FFABA7;
+  --info-bg: #EAF1FE;
+  --info-border: #A9C5F9;
+
+  /* --- Extended Palette --- */
+  --red-95: #FEECEC;
+  --red-30: #BE0F09;
+  --violet-95: #F0ECFE;
+  --violet-50: #6541F2;
+  --emerald-blue-95: #D5FFFE;
+  --emerald-blue-45: #16ADA8;
+
+  /* --- Typography --- */
+  --font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  --font-size-h1: 36px;
+  --font-size-h2: 32px;
+  --font-size-h3: 28px;
+  --font-size-h4: 24px;
+  --font-size-h5: 20px;
+  --font-size-h6: 18px;
+  --font-size-body1: 16px;
+  --font-size-body2: 14px;
+  --font-size-caption1: 12px;
+  --font-size-caption2: 10px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* --- Layout --- */
+  --layout-max-width: 1920px;
+  --content-min-width: 1156px;
+  --header-height: 64px;
+  --sider-width: 200px;
+  --sider-collapsed-width: 80px;
+  --content-padding: 24px 34px 40px 34px;
+
+  /* --- Border Radius --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-full: 100px;
+
+  /* --- Box Shadow --- */
+  --shadow-modal: 0px 4px 12px 0px rgba(0, 0, 0, 0.08);
+  --shadow-collapse-active: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-toggle: 0px 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-radio-btn: 0 2px 0 rgba(0, 0, 0, 0.02);
+}
+
+
+/* ============================================================
+   2. RESET & BASE
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  color: var(--black);
+  line-height: 1.5;
+  background-color: var(--gray-2);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--primary-main);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   3. GLOBAL LAYOUT
+   ============================================================ */
+
+/* --- 전체 래퍼 --- */
+.bw-layout {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--layout-max-width);
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+/* --- 헤더 --- */
+.bw-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 11;
+  height: var(--header-height);
+  max-height: var(--header-height);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  background-color: var(--primary-pb800);
+  padding: 0 16px;
+  border-bottom: 1px solid #EEF1F4;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: var(--white);
+}
+
+.bw-header-logo {
+  height: 26px;
+}
+
+.bw-header-user {
+  color: var(--white);
+  font-size: var(--font-size-body2);
+}
+
+/* --- 사이드바 --- */
+.bw-sider {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  width: var(--sider-width);
+  height: calc(100vh - var(--header-height));
+  z-index: 999;
+  background: var(--white);
+  border-right: 1px solid #F0F0F0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.bw-sider.collapsed {
+  width: var(--sider-collapsed-width);
+}
+
+/* 사이드바 메뉴 토글 */
+.bw-sider-toggle {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 8px;
+}
+
+.bw-sider-toggle-item {
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  color: var(--gray-5);
+}
+
+.bw-sider-toggle-item.active {
+  color: var(--black);
+}
+
+.bw-sider-divider {
+  width: 1px;
+  height: 14px;
+  background-color: var(--gray-4);
+}
+
+/* 사이드바 메뉴 */
+.bw-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bw-menu-item {
+  padding: 8px 12px 8px 24px;
+  font-size: var(--font-size-body2);
+  cursor: pointer;
+  color: var(--gray-8);
+  line-height: 1.5;
+}
+
+.bw-menu-item:hover {
+  background-color: var(--gray-1);
+}
+
+.bw-menu-item.active {
+  color: var(--primary-main);
+  background-color: var(--primary-p100);
+}
+
+.bw-menu-group-title {
+  padding: 8px 12px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-9);
+}
+
+/* --- 메인 영역 --- */
+.bw-main {
+  margin-left: var(--sider-width);
+  margin-top: var(--header-height);
+  min-width: var(--content-min-width);
+  max-height: calc(100vh - var(--header-height));
+  overflow: auto;
+  background: var(--white);
+}
+
+.bw-main.collapsed {
+  margin-left: var(--sider-collapsed-width);
+}
+
+/* --- 탭 바 --- */
+.bw-tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 24px 0 0 34px;
+  background: var(--white);
+}
+
+.bw-tab-item {
+  padding: 8px 16px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-medium);
+  background: var(--gray-4);
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  color: var(--gray-6);
+  border: none;
+  position: relative;
+}
+
+.bw-tab-item.active {
+  background: var(--gray-2);
+  color: var(--black);
+}
+
+.bw-tab-close {
+  margin-left: 8px;
+  color: var(--gray-6);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.bw-tab-item.active .bw-tab-close {
+  color: var(--primary-main);
+}
+
+/* --- 콘텐츠 영역 --- */
+.bw-content {
+  padding: var(--content-padding);
+  background: var(--gray-2);
+  min-width: var(--content-min-width);
+  min-height: calc(100vh - var(--header-height) - 48px);
+}
+
+/* --- 푸터 --- */
+.bw-footer {
+  padding: 80px 40px;
+  min-width: 1220px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  background: var(--white);
+}
+
+.bw-footer-terms {
+  color: var(--gray-9);
+  line-height: 1;
+}
+
+.bw-footer-terms span {
+  padding: 0 4px;
+}
+
+.bw-footer-company {
+  color: var(--gray-7);
+  line-height: 1.5;
+}
+
+.bw-footer-divider {
+  border-bottom: 1px solid var(--gray-4);
+  margin: 20px 0;
+}
+
+
+/* ============================================================
+   4. CONTENT CONTAINERS
+   ============================================================ */
+
+/* 페이지 내 콘텐츠 세로 배치 */
+.bw-content-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+}
+
+/* 카드 (Ant Card 재현) */
+.bw-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-3);
+  padding: 16px 12px;
+}
+
+.bw-card.no-padding {
+  padding: 0;
+}
+
+.bw-card-body {
+  padding: 20px;
+}
+
+/* 테두리 있는 컨테이너 */
+.bw-bordered-container {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-3);
+}
+
+/* 검색 필터 컨테이너 */
+.bw-search-filter {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-3);
+  background: var(--white);
+}
+
+.bw-search-filter .bw-filter-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
+.bw-search-filter .bw-filter-label {
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  color: var(--gray-5);
+}
+
+
+/* ============================================================
+   5. SHARED STYLED-COMPONENTS PATTERNS
+   ============================================================ */
+
+/* FlexRow */
+.bw-flex-row {
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: 150%;
+}
+
+/* LinedFlexRow */
+.bw-lined-flex-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 10px;
+  margin: 20px 0;
+  background-color: var(--gray-1);
+  border-bottom: 1px solid var(--gray-3);
+  border-top: 1px solid var(--gray-3);
+  min-height: 68px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: 150%;
+}
+
+/* CardTitle */
+.bw-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-body1);
+  font-weight: var(--font-weight-medium);
+  line-height: 150%;
+}
+
+.bw-card-title .bw-icon {
+  color: var(--gray-4);
+}
+
+/* LabelFlex */
+.bw-label-flex {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ContentCard */
+.bw-content-card {
+  flex: 1 1 0;
+  padding: 16px 12px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-3);
+}
+
+.bw-content-card.compact {
+  padding: 0 12px 16px 12px;
+}
+
+
+/* ============================================================
+   6. COLLAPSE (Ant Collapse 재현)
+   ============================================================ */
+
+.bw-collapse {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bw-collapse-panel {
+  border: 1px solid var(--gray-3);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  overflow: hidden;
+}
+
+.bw-collapse-panel.active {
+  box-shadow: var(--shadow-collapse-active);
+}
+
+.bw-collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: var(--font-size-body1);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+}
+
+.bw-collapse-panel.active .bw-collapse-header {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.bw-collapse-arrow {
+  transition: transform 0.2s;
+  color: var(--gray-6);
+  font-size: 12px;
+}
+
+.bw-collapse-panel.active .bw-collapse-arrow {
+  transform: rotate(180deg);
+}
+
+.bw-collapse-extra {
+  order: -1;
+  margin-right: 8px;
+}
+
+.bw-collapse-content {
+  border-top: 1px solid var(--gray-3);
+  padding: 0;
+  display: none;
+}
+
+.bw-collapse-panel.active .bw-collapse-content {
+  display: block;
+  background: var(--gray-1);
+}
+
+.bw-collapse-content-inner {
+  padding: 20px;
+}
+
+
+/* ============================================================
+   7. TABLE (Ant Table 재현)
+   ============================================================ */
+
+.bw-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--gray-3);
+  border-radius: 0;
+}
+
+.bw-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body2);
+}
+
+.bw-table thead th {
+  background: var(--primary-pb800);
+  color: var(--white);
+  padding: 10px 16px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  text-align: left;
+  border-bottom: 1px solid var(--gray-3);
+  border-left: 1px solid var(--gray-3);
+  white-space: nowrap;
+}
+
+.bw-table thead th:first-child {
+  border-left: none;
+}
+
+.bw-table tbody td {
+  padding: 12px 16px;
+  height: 48px;
+  border-bottom: 1px solid var(--gray-3);
+  border-left: 1px solid var(--gray-3);
+  color: var(--black);
+  vertical-align: middle;
+}
+
+.bw-table tbody td:first-child {
+  border-left: none;
+}
+
+.bw-table tbody tr:hover {
+  background-color: var(--gray-1);
+}
+
+/* 테이블 체크박스 열 */
+.bw-table .col-checkbox {
+  width: 48px;
+  text-align: center;
+}
+
+/* 테이블 정렬 아이콘 */
+.bw-table .sort-icon {
+  color: var(--gray-5);
+  margin-left: 4px;
+}
+
+.bw-table .sort-icon.active {
+  color: var(--black);
+}
+
+
+/* ============================================================
+   8. FORM ELEMENTS
+   ============================================================ */
+
+/* --- Input --- */
+.bw-input {
+  height: 32px;
+  padding: 4px 11px;
+  font-size: var(--font-size-body2);
+  font-family: var(--font-family);
+  border: 1px solid var(--gray-4);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--black);
+  background: var(--white);
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.bw-input:hover {
+  border-color: var(--primary-main);
+}
+
+.bw-input:focus {
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 2px rgba(40, 110, 240, 0.1);
+}
+
+.bw-input::placeholder {
+  font-size: var(--font-size-body2);
+  color: var(--gray-5);
+}
+
+.bw-input:disabled {
+  color: var(--gray-8);
+  background: var(--gray-1);
+  cursor: not-allowed;
+}
+
+.bw-input.lg {
+  height: 40px;
+}
+
+.bw-input.sm {
+  height: 32px;
+}
+
+/* --- Select --- */
+.bw-select {
+  height: 32px;
+  padding: 4px 11px;
+  font-size: var(--font-size-body2);
+  font-family: var(--font-family);
+  border: 1px solid var(--gray-4);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--black);
+  background: var(--white);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239DA0A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  padding-right: 28px;
+}
+
+.bw-select:hover {
+  border-color: var(--primary-main);
+}
+
+.bw-select.lg {
+  height: 40px;
+}
+
+/* --- Textarea --- */
+.bw-textarea {
+  padding: 8px 11px;
+  font-size: var(--font-size-body2);
+  font-family: var(--font-family);
+  border: 1px solid var(--gray-4);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--black);
+  background: var(--white);
+  resize: vertical;
+  width: 100%;
+  line-height: 1.5;
+}
+
+.bw-textarea:hover {
+  border-color: var(--primary-main);
+}
+
+.bw-textarea:focus {
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 2px rgba(40, 110, 240, 0.1);
+}
+
+/* --- Checkbox --- */
+.bw-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--font-size-body2);
+}
+
+.bw-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-main);
+  cursor: pointer;
+}
+
+.bw-checkbox.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --- Radio --- */
+.bw-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--font-size-body2);
+}
+
+.bw-radio input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-main);
+  cursor: pointer;
+}
+
+.bw-radio.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Radio Button Group (.radio-group-btn 재현) */
+.bw-radio-btn-group {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.bw-radio-btn {
+  border: 1px solid var(--gray-4);
+  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  font-size: var(--font-size-body2);
+  background: var(--white);
+  cursor: pointer;
+  text-align: center;
+  box-shadow: var(--shadow-radio-btn);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.bw-radio-btn:hover {
+  border-color: var(--primary-main);
+}
+
+.bw-radio-btn.active {
+  border-color: var(--primary-main);
+  color: var(--primary-main);
+}
+
+/* --- Form Item / Form Row --- */
+.bw-form-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bw-form-label {
+  min-width: 120px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: 32px;
+  color: var(--gray-8);
+}
+
+.bw-form-label.required::after {
+  content: ' *';
+  color: var(--error);
+}
+
+.bw-form-control {
+  flex: 1;
+}
+
+.bw-form-error {
+  color: var(--error);
+  font-size: var(--font-size-caption1);
+  margin-top: 4px;
+}
+
+/* formError 테두리 */
+.bw-form-error-border {
+  border-color: var(--error) !important;
+}
+
+
+/* ============================================================
+   9. BUTTONS (Ant Button 재현)
+   ============================================================ */
+
+.bw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 16px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  font-family: var(--font-family);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-4);
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.bw-btn:hover {
+  color: var(--primary-main);
+  border-color: var(--primary-main);
+}
+
+.bw-btn.lg {
+  height: 40px;
+  font-size: var(--font-size-body2);
+}
+
+.bw-btn.sm {
+  height: 32px;
+}
+
+/* Primary */
+.bw-btn-primary {
+  background: var(--primary-main);
+  border-color: var(--primary-main);
+  color: var(--white);
+}
+
+.bw-btn-primary:hover {
+  background: var(--primary-p900);
+  border-color: var(--primary-p900);
+  color: var(--white);
+}
+
+/* Danger / Error */
+.bw-btn-danger {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.bw-btn-danger:hover {
+  color: #FF4D4F;
+  border-color: #FF4D4F;
+}
+
+/* Text */
+.bw-btn-text {
+  border: none;
+  background: transparent;
+  padding: 0 8px;
+}
+
+.bw-btn-text:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Link */
+.bw-btn-link {
+  border: none;
+  background: transparent;
+  color: var(--primary-main);
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Disabled */
+.bw-btn:disabled,
+.bw-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   10. DIVIDER
+   ============================================================ */
+
+.bw-divider {
+  border: none;
+  border-top: 1px solid var(--gray-3);
+  margin: 16px 0;
+}
+
+.bw-divider-vertical {
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  background-color: var(--gray-4);
+  margin: 0 8px;
+  vertical-align: middle;
+}
+
+
+/* ============================================================
+   11. MODAL
+   ============================================================ */
+
+.bw-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bw-modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bw-modal-header {
+  height: 58px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-3);
+}
+
+.bw-modal-title {
+  font-size: var(--font-size-body1);
+  font-weight: var(--font-weight-medium);
+  line-height: 150%;
+}
+
+.bw-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--black);
+  padding: 4px;
+}
+
+.bw-modal-body {
+  padding: 16px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.bw-modal-footer {
+  padding: 10px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid var(--gray-3);
+}
+
+/* bvModal 스타일 (StorePolicyCard) */
+.bw-modal.bv-modal .bw-modal-header {
+  padding: 16px 24px;
+}
+
+.bw-modal.bv-modal .bw-modal-title {
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-bold);
+}
+
+.bw-modal.bv-modal .bw-modal-body .bw-label {
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  color: var(--gray-8);
+}
+
+
+/* ============================================================
+   12. TOOLTIP
+   ============================================================ */
+
+.bw-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.bw-tooltip-icon {
+  color: var(--gray-4);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.bw-tooltip-icon.warning {
+  color: var(--caution);
+}
+
+.bw-tooltip-icon.error {
+  color: var(--error);
+}
+
+.bw-tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: var(--white);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-body2);
+  white-space: nowrap;
+  z-index: 1050;
+  text-align: center;
+}
+
+.bw-tooltip:hover .bw-tooltip-content {
+  display: block;
+}
+
+
+/* ============================================================
+   13. INFORMATION / ALERT
+   ============================================================ */
+
+.bw-info {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: 150%;
+  gap: 8px;
+  white-space: pre-wrap;
+}
+
+.bw-info.type-info {
+  background: var(--info-bg);
+  color: var(--primary-main);
+  border: 1px solid var(--info-border);
+}
+
+.bw-info.type-error {
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid var(--error-border);
+}
+
+.bw-info-icon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+
+/* ============================================================
+   14. TABS (내부 탭, 컨텐츠 내 Tabs 재현)
+   ============================================================ */
+
+.bw-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--gray-3);
+  gap: 0;
+}
+
+.bw-tabs-item {
+  padding: 16px;
+  font-size: var(--font-size-body1);
+  font-weight: var(--font-weight-regular);
+  cursor: pointer;
+  color: var(--gray-6);
+  border-bottom: 4px solid transparent;
+  transition: all 0.2s;
+}
+
+.bw-tabs-item:hover {
+  color: var(--primary-main);
+}
+
+.bw-tabs-item.active {
+  color: var(--primary-main);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--primary-main);
+}
+
+.bw-tabs-content {
+  padding: 16px 0;
+}
+
+
+/* ============================================================
+   15. TAGS
+   ============================================================ */
+
+.bw-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: var(--font-size-caption1);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-3);
+  background: var(--gray-1);
+  color: var(--gray-8);
+}
+
+.bw-tag.primary {
+  background: var(--primary-p100);
+  border-color: var(--primary-p400);
+  color: var(--primary-main);
+}
+
+.bw-tag.success {
+  background: #F6FFED;
+  border-color: #B7EB8F;
+  color: var(--success);
+}
+
+.bw-tag.error {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+  color: var(--error);
+}
+
+.bw-tag.warning {
+  background: #FFFBE6;
+  border-color: #FFE58F;
+  color: #D48806;
+}
+
+
+/* ============================================================
+   16. BREADCRUMB
+   ============================================================ */
+
+.bw-breadcrumb {
+  display: flex;
+  gap: 8px;
+  font-size: var(--font-size-body2);
+  color: var(--gray-6);
+  margin-bottom: 16px;
+}
+
+.bw-breadcrumb-item:last-child {
+  color: var(--primary-pb800);
+}
+
+.bw-breadcrumb-separator {
+  color: var(--gray-5);
+}
+
+
+/* ============================================================
+   17. PAGINATION
+   ============================================================ */
+
+.bw-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.bw-pagination-item {
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gray-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-body2);
+  background: var(--white);
+}
+
+.bw-pagination-item:hover {
+  color: var(--primary-main);
+  border-color: var(--primary-main);
+}
+
+.bw-pagination-item.active {
+  color: var(--primary-main);
+  border-color: var(--primary-main);
+  font-weight: var(--font-weight-medium);
+}
+
+
+/* ============================================================
+   18. UTILITY CLASSES
+   ============================================================ */
+
+/* --- Display --- */
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+.d-block { display: block; }
+.d-inline-block { display: inline-block; }
+.d-none { display: none; }
+
+/* --- Flex --- */
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* --- Gap --- */
+.gap-4 { gap: 4px; }
+.gap-8 { gap: 8px; }
+.gap-10 { gap: 10px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-20 { gap: 20px; }
+.gap-24 { gap: 24px; }
+
+/* --- Width --- */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+
+/* --- Text --- */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* --- Font Size --- */
+.text-h1 { font-size: var(--font-size-h1); }
+.text-h2 { font-size: var(--font-size-h2); }
+.text-h3 { font-size: var(--font-size-h3); }
+.text-h4 { font-size: var(--font-size-h4); }
+.text-h5 { font-size: var(--font-size-h5); }
+.text-h6 { font-size: var(--font-size-h6); }
+.text-body1 { font-size: var(--font-size-body1); }
+.text-body2 { font-size: var(--font-size-body2); }
+.text-caption1 { font-size: var(--font-size-caption1); }
+.text-caption2 { font-size: var(--font-size-caption2); }
+
+/* --- Font Weight --- */
+.font-regular { font-weight: var(--font-weight-regular); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+/* --- Colors (text) --- */
+.text-primary { color: var(--primary-main); }
+.text-black { color: var(--black); }
+.text-gray9 { color: var(--gray-9); }
+.text-gray8 { color: var(--gray-8); }
+.text-gray7 { color: var(--gray-7); }
+.text-gray6 { color: var(--gray-6); }
+.text-gray5 { color: var(--gray-5); }
+.text-white { color: var(--white); }
+.text-error { color: var(--error); }
+.text-success { color: var(--success); }
+.text-caution { color: var(--caution); }
+
+/* --- Background Colors --- */
+.bg-white { background-color: var(--white); }
+.bg-gray1 { background-color: var(--gray-1); }
+.bg-gray2 { background-color: var(--gray-2); }
+.bg-primary-light { background-color: var(--primary-p100); }
+
+/* --- Margin --- */
+.m-0 { margin: 0; }
+.mt-4 { margin-top: 4px; }
+.mt-8 { margin-top: 8px; }
+.mt-10 { margin-top: 10px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.ml-8 { margin-left: 8px; }
+.ml-16 { margin-left: 16px; }
+.mr-8 { margin-right: 8px; }
+.mr-16 { margin-right: 16px; }
+
+/* --- Padding --- */
+.p-0 { padding: 0; }
+.p-8 { padding: 8px; }
+.p-10 { padding: 10px; }
+.p-12 { padding: 12px; }
+.p-16 { padding: 16px; }
+.p-20 { padding: 20px; }
+.p-24 { padding: 24px; }
+.px-12 { padding-left: 12px; padding-right: 12px; }
+.px-16 { padding-left: 16px; padding-right: 16px; }
+.px-24 { padding-left: 24px; padding-right: 24px; }
+.py-10 { padding-top: 10px; padding-bottom: 10px; }
+.py-12 { padding-top: 12px; padding-bottom: 12px; }
+.py-16 { padding-top: 16px; padding-bottom: 16px; }
+.py-20 { padding-top: 20px; padding-bottom: 20px; }
+
+/* --- Border --- */
+.border { border: 1px solid var(--gray-3); }
+.border-t { border-top: 1px solid var(--gray-3); }
+.border-b { border-bottom: 1px solid var(--gray-3); }
+.border-none { border: none; }
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+
+/* --- Link 스타일 --- */
+.link-like {
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-decoration: underline;
+  color: var(--primary-main);
+  cursor: pointer;
+}
+
+/* --- 기타 --- */
+.hover-pointer:hover { cursor: pointer; }
+.full-width { width: 100%; }
+.no-margin { margin: 0; }
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.whitespace-nowrap { white-space: nowrap; }
+.whitespace-pre-wrap { white-space: pre-wrap; }
+
+
+/* ============================================================
+   19. RESPONSIVE HELPERS
+   ============================================================ */
+
+/* Ant Design Row/Col 간단 재현 */
+.bw-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.bw-col { flex: 0 0 auto; }
+.bw-col-1 { width: 4.1667%; }
+.bw-col-2 { width: 8.3333%; }
+.bw-col-3 { width: 12.5%; }
+.bw-col-4 { width: 16.6667%; }
+.bw-col-5 { width: 20.8333%; }
+.bw-col-6 { width: 25%; }
+.bw-col-7 { width: 29.1667%; }
+.bw-col-8 { width: 33.3333%; }
+.bw-col-9 { width: 37.5%; }
+.bw-col-10 { width: 41.6667%; }
+.bw-col-11 { width: 45.8333%; }
+.bw-col-12 { width: 50%; }
+.bw-col-13 { width: 54.1667%; }
+.bw-col-14 { width: 58.3333%; }
+.bw-col-15 { width: 62.5%; }
+.bw-col-16 { width: 66.6667%; }
+.bw-col-17 { width: 70.8333%; }
+.bw-col-18 { width: 75%; }
+.bw-col-19 { width: 79.1667%; }
+.bw-col-20 { width: 83.3333%; }
+.bw-col-21 { width: 87.5%; }
+.bw-col-22 { width: 91.6667%; }
+.bw-col-23 { width: 95.8333%; }
+.bw-col-24 { width: 100%; }
+
+
+/* ============================================================
+   20. SPACE (Ant Space 재현)
+   ============================================================ */
+
+.bw-space {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bw-space.vertical {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bw-space.small { gap: 8px; }
+.bw-space.middle { gap: 16px; }
+.bw-space.large { gap: 24px; }
+
+
+/* ============================================================
+   21. SCROLLBAR (실제 백오피스 스타일)
+   ============================================================ */
+
+::-webkit-scrollbar {
+  background-color: var(--white);
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--white);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #BABAC0;
+  border-radius: 16px;
+  border: 4px solid var(--white);
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}

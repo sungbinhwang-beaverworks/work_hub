@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디자인 스펙 — POS 매출전표 당일 취소결제 반영여부 토글 추가</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+:root {
+  --color-primary: #286ef0;
+  --color-primary-100: #eaf1fe;
+  --color-primary-200: #d4e2fc;
+  --color-primary-b800: #132c58;
+  --color-white: #ffffff;
+  --color-gray-1: #f9fafc;
+  --color-gray-2: #eff1f4;
+  --color-gray-3: #e4e6ea;
+  --color-gray-4: #d7dde4;
+  --color-gray-5: #bec1c7;
+  --color-gray-6: #9da0a8;
+  --color-gray-7: #7f828c;
+  --color-gray-8: #5a5e6a;
+  --color-gray-9: #3b3f4a;
+  --color-black: #000000;
+  --color-typo-title: #3b3f4a;
+  --color-typo-subtitle: #5a5e6a;
+  --color-typo-body: #7f828c;
+  --color-typo-disabled: #9da0a8;
+  --color-red: #eb2341;
+  --color-red-dark: #992534;
+  --color-red-light: #ffebee;
+  --color-red-mid: #fc98a7;
+  --color-green: #18a358;
+  --color-green-dark: #1f7343;
+  --color-green-light: #e8f6ef;
+  --color-green-mid: #8cd1ab;
+  --color-warning: #faad14;
+  --font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 28px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family);
+  font-size: var(--fs-md);
+  color: var(--color-typo-title);
+  background: #e8eaed;
+  line-height: 1.6;
+  padding: 48px;
+}
+
+.spec-board { max-width: 1400px; margin: 0 auto; }
+
+/* ─── 파트 1: 요약카드 ─── */
+.summary-card {
+  background: #2a2a2a;
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-8);
+  margin-bottom: var(--space-10);
+  color: var(--color-white);
+}
+.summary-badges {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(130, 100, 255, 0.25);
+  color: #c4b5fd;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+.summary-badge a {
+  color: #c4b5fd;
+  text-decoration: underline;
+}
+.summary-product {
+  font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.5);
+  margin-bottom: var(--space-1);
+}
+.summary-title {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--color-white);
+  margin-bottom: var(--space-5);
+  letter-spacing: -0.3px;
+}
+.summary-section {
+  margin-bottom: var(--space-4);
+}
+.summary-section-label {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: #c4b5fd;
+  margin-bottom: var(--space-1);
+}
+.summary-section p {
+  font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.85);
+  line-height: 1.8;
+}
+
+/* ─── 섹션 제목 ─── */
+.section-title {
+  font-size: var(--fs-2xl); font-weight: var(--fw-bold); color: var(--color-primary-b800);
+  margin: 56px 0 var(--space-6);
+  padding-bottom: var(--space-3); border-bottom: 2px solid var(--color-primary-b800);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.section-title .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary-b800);
+  color: var(--color-white); font-size: 15px; font-weight: var(--fw-bold);
+}
+
+.spec-divider { border: none; border-top: 1px dashed var(--color-gray-4); margin: var(--space-10) 0; }
+
+/* ─── 어노테이션 카드 ─── */
+.annotation-row { display: flex; gap: var(--space-6); margin-bottom: var(--space-6); flex-wrap: wrap; }
+.annotation-card { flex: 1; min-width: 280px; background: var(--color-white); border-radius: 10px; padding: var(--space-6); border: 1px solid var(--color-gray-3); box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.annotation-card h4 { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-primary-b800); margin-bottom: var(--space-3); display: flex; align-items: center; gap: 8px; }
+.annotation-card p { font-size: var(--fs-sm); color: var(--color-typo-subtitle); line-height: 1.8; }
+.annotation-card .highlight { color: var(--color-primary); font-weight: var(--fw-bold); }
+.callout { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--color-primary); color: var(--color-white); font-size: 12px; font-weight: var(--fw-bold); flex-shrink: 0; }
+
+/* ─── 프로토타입 재현 스타일 ─── */
+.proto-embed {
+  border: 1px solid var(--color-gray-4);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  margin-bottom: var(--space-8);
+}
+
+/* Collapse 스타일 */
+.collapse-panel {
+  border: 1px solid var(--color-gray-3);
+  border-radius: 8px;
+  background: var(--color-white);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 52px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--color-white);
+}
+.collapse-header-text {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-typo-title);
+}
+.collapse-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+}
+.collapse-arrow.up { transform: rotate(180deg); }
+.collapse-body {
+  padding: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* FlexRow */
+.flex-row {
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  min-height: 40px;
+}
+.flex-row .label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  color: var(--color-typo-title);
+  line-height: 150%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.col-5 { width: 20.83%; flex-shrink: 0; }
+.col-7 { width: 29.17%; flex-shrink: 0; }
+.col-4 { width: 16.67%; flex-shrink: 0; }
+.col-19 { width: 79.17%; flex-shrink: 0; }
+
+/* 라디오 버튼 */
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--color-typo-title);
+  cursor: default;
+}
+.radio-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gray-4);
+  background: var(--color-white);
+  position: relative;
+  flex-shrink: 0;
+}
+.radio-circle.selected {
+  border-color: var(--color-primary);
+}
+.radio-circle.selected::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+/* 체크박스 */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--color-typo-title);
+  cursor: default;
+}
+.checkbox-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid var(--color-gray-4);
+  background: var(--color-white);
+  flex-shrink: 0;
+}
+.checkbox-box.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.checkbox-box.unchecked-empty {
+  background: var(--color-white);
+}
+
+/* Divider */
+.field-divider {
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  margin: 0;
+}
+
+/* Info 아이콘 */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-gray-5);
+  color: var(--color-white);
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* 버튼 */
+.btn {
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid var(--color-gray-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  font-size: var(--fs-sm);
+  font-family: var(--font-family);
+  color: var(--color-typo-title);
+  cursor: pointer;
+}
+.btn.disabled {
+  color: var(--color-gray-5);
+  cursor: not-allowed;
+}
+
+/* LinedFlexRow */
+.lined-flex-row {
+  display: flex;
+  align-items: center;
+  padding: 22px 10px;
+  border-left: 3px solid var(--color-gray-3);
+  margin-left: 20px;
+  background: var(--color-gray-1);
+}
+
+/* 직원호출카드 설정 카드 */
+.bordered-card {
+  border: 1px solid var(--color-gray-3);
+  border-radius: 8px;
+  background: var(--color-white);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.bordered-card-title {
+  padding: 14px 16px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-typo-title);
+  border-bottom: 1px solid var(--color-gray-3);
+  background: var(--color-gray-1);
+}
+</style>
+</head>
+<body>
+<div class="spec-board">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 파트 1: 요약카드                                        -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="summary-card">
+    <div class="summary-badges">
+      <span class="summary-badge">담당자: 황성빈</span>
+      <span class="summary-badge">26.03.27</span>
+      <span class="summary-badge"><a href="#">아사나 링크</a></span>
+    </div>
+    <div class="summary-product">매장관리</div>
+    <div class="summary-title">(개선) POS 매출전표_결제수단별 매출/취소현황 개선</div>
+    <div class="summary-section">
+      <span class="summary-section-label">[요청배경]</span>
+      <p>결제일자와 취소일자가 다를 때 POS 매출전표와 매장관리앱 간 매출 집계 차이 발생.<br>25년 10월 미반영(N) 정책으로 변경했으나, 삼성서울병원/드림하이테크에서 반영(Y)으로 원복 요청.</p>
+    </div>
+    <div class="summary-section">
+      <span class="summary-section-label">[요청사항]</span>
+      <p>매장운영설정 &gt; 기타 정책 설정에 "당일 취소결제 반영여부" 토글 추가 (Default: 미반영).<br>삼성서울병원/드림하이테크는 반영(Y) 설정 대응.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 파트 2: To-be 화면 재현                                  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-title"><span class="num">1</span> To-be 화면</div>
+
+  <div class="proto-embed">
+    <!-- ─── 글로벌 헤더 ─── -->
+    <header style="height:64px; background:#132c58; display:flex; align-items:center; justify-content:space-between; padding:0 16px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="color:white; font-size:var(--fs-sm); font-weight:700; letter-spacing:-0.3px;">SK broadband</span>
+        <span style="color:rgba(255,255,255,0.4); font-size:var(--fs-xs);">&times;</span>
+        <span style="color:white; font-size:var(--fs-sm); font-weight:700; letter-spacing:-0.3px;">비버매장연구소</span>
+      </div>
+      <span style="color:white; font-size:var(--fs-sm); font-weight:700;">홍길동 (beaver01) <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke="currentColor" stroke-width="2"/></svg></span>
+    </header>
+
+    <div style="display:flex; min-height:820px;">
+      <!-- ─── 사이드바 ─── -->
+      <aside style="width:200px; flex-shrink:0; background:var(--color-white); border-right:1px solid #f0f0f0; font-size:var(--fs-sm); overflow-y:auto;">
+        <!-- 메뉴/즐겨찾기 + 검색 -->
+        <div style="padding:12px 8px 8px; display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px; font-size:var(--fs-sm); font-weight:500; line-height:22px;">
+            <span style="color:#000000;">메뉴</span>
+            <div style="width:1px; height:10px; background:var(--color-gray-3);"></div>
+            <span style="color:#BEC1C7;">즐겨찾기</span>
+          </div>
+          <div style="position:relative;">
+            <input style="width:100%; height:32px; padding:5px 32px 5px 11px; border:1px solid var(--color-gray-4); border-radius:4px; background:var(--color-white); font-size:var(--fs-sm); outline:none; font-family:var(--font-family); box-sizing:border-box;" placeholder="메뉴명 검색">
+            <svg width="14" height="14" fill="none" viewBox="0 0 16 16" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--color-gray-5);"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <!-- 메뉴 아이템 -->
+        <div style="display:flex; flex-direction:column; padding:4px 4px;">
+          <!-- 매출현황 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; gap:8px; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M946.5 505L560.1 118.8l-25.9-25.9a31.5 31.5 0 00-44.4 0L77.5 505a63.9 63.9 0 00-18.8 46c.4 35.2 29.7 63.3 64.9 63.3h42.5V940h691.8V614.3h43.4c17.1 0 33.2-6.7 45.3-18.8a63.6 63.6 0 0018.7-45.3c0-17-6.7-33.1-18.8-45.2z"/></svg>
+            매출현황
+          </div>
+          <!-- 매출관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M864 518H506V160c0-4.4-3.6-8-8-8h-26a398.46 398.46 0 00-282.8 117.1 398.19 398.19 0 00-85.7 127.1A397.61 397.61 0 0072 552a398.46 398.46 0 00117.1 282.8c36.7 36.7 79.5 65.6 127.1 85.7A397.61 397.61 0 00472 952a398.46 398.46 0 00282.8-117.1c36.7-36.7 65.6-79.5 85.7-127.1A397.61 397.61 0 00872 552v-26c0-4.4-3.6-8-8-8z"/></svg> 매출관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 정산관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32z"/></svg> 정산관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 매장관리 (열림) -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-primary); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-primary)" viewBox="0 0 1024 1024"><path d="M882 272.1V144c0-17.7-14.3-32-32-32H174c-17.7 0-32 14.3-32 32v128.1c-16.7 1-30 14.9-30 31.9v131.7a177 177 0 0014.4 70.4c4.3 10.2 9.6 19.8 15.6 28.9v345c0 17.6 14.3 32 32 32h676c17.7 0 32-14.3 32-32V534a240 240 0 0015.6-28.9c9.5-22.3 14.4-46 14.4-70.4V302.9c0-17-13.3-30.9-30-31.8z"/></svg> 매장관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" style="transform:rotate(180deg);"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- depth2: 매장운영관리 (열림) -->
+          <div style="padding:8px 12px 8px 36px; color:var(--color-primary); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            매장운영관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" style="transform:rotate(180deg);"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- depth3 -->
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장정보</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-primary); font-weight:500; cursor:pointer; background:var(--color-primary-100); border-radius:4px;">매장운영설정</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">장비정책설정</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장직원관리</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장콘텐츠관리</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장멤버십관리</div>
+        </div>
+      </aside>
+
+      <!-- ─── 메인 영역 ─── -->
+      <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+        <!-- 탭 카드 -->
+        <div style="display:flex; align-items:flex-end; gap:4px; background:var(--color-white); padding:10px 16px 0;">
+          <div style="padding:8px 16px; font-size:var(--fs-sm); font-weight:var(--fw-medium); background:var(--color-gray-2); color:var(--color-black); border-radius:4px 4px 0 0; display:flex; align-items:center; gap:8px;">매장운영설정 <span style="color:var(--color-gray-6); font-size:10px; cursor:pointer;">&times;</span></div>
+        </div>
+
+        <!-- 컨텐츠 영역 -->
+        <div style="flex:1; background:var(--color-gray-2); padding:24px 34px;">
+          <!-- 브레드크럼 -->
+          <div style="font-size:var(--fs-sm); color:var(--color-gray-8); margin-bottom:16px;">
+            매장관리 <span style="color:var(--color-gray-5);">&gt;</span> 매장운영관리 <span style="color:var(--color-gray-5);">&gt;</span> <span style="color:#132c58;">매장운영설정</span>
+          </div>
+          <!-- 타이틀 -->
+          <h1 style="font-size:var(--fs-xl); font-weight:var(--fw-bold); color:var(--color-black); margin-bottom:20px;">매장운영설정</h1>
+
+          <!-- 접힌 Collapse들: 단체 및 예약 서비스 정보 등 -->
+          <div style="display:flex; flex-direction:column; gap:12px;">
+
+            <!-- 단체 및 예약 서비스 정보 (접힌) -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">단체 및 예약 서비스 정보</span>
+                <span class="collapse-arrow"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+
+            <!-- 기타 제공 서비스 정보 (접힌) -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">기타 제공 서비스 정보</span>
+                <span class="collapse-arrow"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+
+            <!-- 포장비 부과 설정 (접힌) -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">포장비 부과 설정</span>
+                <span class="collapse-arrow"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+
+            <!-- 컵보증금 설정 (접힌) -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">컵보증금 설정</span>
+                <span class="collapse-arrow"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+
+            <!-- 키오스크 일회용품 제공 설정 (접힌) -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">키오스크 일회용품 제공 설정</span>
+                <span class="collapse-arrow"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+
+            <!-- ★ 기타 정책 설정 (열린 상태) ★ -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">기타 정책 설정</span>
+                <span class="collapse-arrow up"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+              <div class="collapse-body">
+
+                <!-- Row 1: 노출 다국어 선택 / 다국어 노출 여부 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">노출 다국어 선택</span></div>
+                  <div class="col-7">
+                    <div class="checkbox-group">
+                      <label class="checkbox-item"><span class="checkbox-box checked"><svg width="10" height="7" fill="none"><path d="M1 3.5L3.5 6 9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 중국어</label>
+                      <label class="checkbox-item"><span class="checkbox-box checked"><svg width="10" height="7" fill="none"><path d="M1 3.5L3.5 6 9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 영어</label>
+                      <label class="checkbox-item"><span class="checkbox-box checked"><svg width="10" height="7" fill="none"><path d="M1 3.5L3.5 6 9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 일본어</label>
+                      <label class="checkbox-item"><span class="checkbox-box checked"><svg width="10" height="7" fill="none"><path d="M1 3.5L3.5 6 9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 한국어</label>
+                    </div>
+                  </div>
+                  <div class="col-5"><span class="label">다국어 노출 여부</span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle selected"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle"></span> 미사용</label>
+                    </div>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 2: 진동벨 사용여부 / 결제완료 화면 설정 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">진동벨 사용여부</span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle selected"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle"></span> 미사용</label>
+                    </div>
+                  </div>
+                  <div class="col-5"><span class="label">결제완료 화면 설정</span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle selected"></span> 대기번호 표시</label>
+                      <label class="radio-item"><span class="radio-circle"></span> 진동벨 번호표기</label>
+                      <label class="radio-item"><span class="radio-circle"></span> 번호 미표시</label>
+                    </div>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 3: 인원수 체크 기능 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">인원수 체크 기능</span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle selected"></span> 미사용</label>
+                    </div>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 4: 간편비밀번호 설정 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">간편비밀번호 설정</span></div>
+                  <div class="col-7">
+                    <button class="btn">비밀번호 설정</button>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 5: 옵션상품 통합출력여부 / 주방프린터 출력 시점 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">옵션상품 통합출력여부 <span class="info-icon">i</span></span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle selected"></span> 미사용</label>
+                    </div>
+                  </div>
+                  <div class="col-5"><span class="label">주방프린터 출력 시점 <span class="info-icon">i</span></span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle selected"></span> 주문접수 시점</label>
+                      <label class="radio-item"><span class="radio-circle"></span> 전달완료 시점</label>
+                    </div>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 6: 직원호출 기능 / 전자영수증 사용여부 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">직원호출 기능 <span class="info-icon">i</span></span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle selected"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle"></span> 미사용</label>
+                    </div>
+                  </div>
+                  <div class="col-5"><span class="label">전자영수증 사용여부 <span class="info-icon">i</span></span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle selected"></span> 미사용</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Row 6-1: 직원호출 안내설정 (조건부, 직원호출 사용 시) -->
+                <div class="lined-flex-row">
+                  <div class="col-5"><span class="label" style="font-size:var(--fs-sm);">&#9654; 직원호출 안내설정</span></div>
+                  <div class="col-19">
+                    <div class="checkbox-group">
+                      <label class="checkbox-item"><span class="checkbox-box unchecked-empty"></span> 알림팝업 <span class="info-icon">i</span></label>
+                      <label class="checkbox-item"><span class="checkbox-box unchecked-empty"></span> 종이출력 <span class="info-icon">i</span></label>
+                    </div>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 7: SNS 링크 설정 -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">SNS 링크 설정 <span class="info-icon">i</span></span></div>
+                  <div class="col-4">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle"></span> 사용</label>
+                      <label class="radio-item"><span class="radio-circle selected"></span> 미사용</label>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <button class="btn disabled">링크 설정</button>
+                  </div>
+                </div>
+                <hr class="field-divider">
+
+                <!-- Row 8: POS 매출전표 당일 취소결제 반영여부 (새 항목) -->
+                <div class="flex-row">
+                  <div class="col-5"><span class="label">POS 매출전표 당일 취소결제 반영여부 <span class="info-icon">i</span></span></div>
+                  <div class="col-7">
+                    <div class="radio-group">
+                      <label class="radio-item"><span class="radio-circle"></span> 반영</label>
+                      <label class="radio-item"><span class="radio-circle selected"></span> 미반영</label>
+                    </div>
+                  </div>
+                  <div class="col-5"></div>
+                  <div class="col-7"></div>
+                </div>
+
+              </div>
+            </div>
+            <!-- ★ 기타 정책 설정 끝 ★ -->
+
+            <!-- 키오스크 전메뉴 영양성분 및 알레르기 유발성분 노출설정 (접힌) -->
+            <div class="collapse-panel">
+              <div class="collapse-header">
+                <span class="collapse-header-text">키오스크 전메뉴 영양성분 및 알레르기 유발성분 노출설정</span>
+                <span class="collapse-arrow"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-6)" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+
+            <!-- 직원호출카드 설정 (열린 상태 - 간략) -->
+            <div class="bordered-card">
+              <div class="bordered-card-title">직원호출카드 설정</div>
+              <div style="padding:20px; color:var(--color-gray-6); font-size:var(--fs-sm);">
+                호출카드 목록 영역
+              </div>
+            </div>
+
+          </div>
+          <!-- Collapse 목록 끝 -->
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+      </div>
+    </div>
+  </div>
+  <!-- 프로토타입 끝 -->
+
+  <hr class="spec-divider">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 파트 3: 어노테이션 카드 내용                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-title"><span class="num">2</span> 어노테이션 참고 내용</div>
+
+  <div class="annotation-row">
+    <div class="annotation-card">
+      <h4><span class="callout">1</span> 변경 포인트</h4>
+      <p>기타 정책 설정 &gt; SNS 링크 설정 하단에<br><span class="highlight">"POS 매출전표 당일 취소결제 반영여부"</span> 항목 추가</p>
+    </div>
+    <div class="annotation-card">
+      <h4><span class="callout">2</span> UI 사양</h4>
+      <p>라디오 버튼 2개: <b>반영 / 미반영</b><br>Default: <span class="highlight">미반영(N)</span></p>
+    </div>
+  </div>
+
+  <div class="annotation-row">
+    <div class="annotation-card">
+      <h4><span class="callout">3</span> 툴팁 내용</h4>
+      <p>"POS 매출전표의 결제수단별 매출/취소현황에서, 결제일과 취소일이 다른 경우 당일 취소결제를 반영할지 설정합니다."</p>
+    </div>
+    <div class="annotation-card">
+      <h4><span class="callout">4</span> 백엔드 선행</h4>
+      <p>정책 코드 2글자 신규 등록<br>DB 마스터 추가<br>Default: <span class="highlight">N</span></p>
+    </div>
+  </div>
+
+  <div class="annotation-row">
+    <div class="annotation-card">
+      <h4><span class="callout">5</span> 운영 조치</h4>
+      <p>삼성서울병원 / 드림하이테크 매장<br>&rarr; <span class="highlight">반영(Y)</span> 설정</p>
+    </div>
+    <div class="annotation-card">
+      <h4><span class="callout">6</span> 프론트 변경</h4>
+      <p><b>StorePolicyCard.tsx</b> 1개 파일<br>applyYesNo 옵션 상수 + FlexRow 1줄 추가</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

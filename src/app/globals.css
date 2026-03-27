@@ -1,0 +1,82 @@
+@import "tailwindcss";
+@import "@beaverworks/design-system/styles.css";
+
+:root {
+  /* ── Work Hub 전용 (디자인시스템 토큰 외 추가분) ── */
+  --color-room-analysis: #eff6ff;
+  --color-room-design: #f5f3ff;
+  --color-room-control: #ecfdf5;
+
+  --color-accent-analysis: #3b82f6;
+  --color-accent-design: #8b5cf6;
+  --color-accent-control: #10b981;
+
+  --color-status-idle: #9da0a8;
+  --color-status-working: #18a358;
+  --color-status-error: #eb2341;
+
+  --color-chat-agent: #f9fafc;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-family);
+  background: var(--color-bg-page);
+  color: var(--color-typo-title);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 스크롤바 커스텀 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-6);
+}
+
+/* 펄스 애니메이션 (에이전트 working 상태) */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+.status-pulse {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+/* 타이핑 인디케이터 */
+@keyframes typing-dot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+.typing-dot:nth-child(1) { animation: typing-dot 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation: typing-dot 1.2s ease-in-out 0.2s infinite; }
+.typing-dot:nth-child(3) { animation: typing-dot 1.2s ease-in-out 0.4s infinite; }
+
+/* 방 선택 애니메이션 */
+@keyframes room-selected {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.room-selected {
+  animation: room-selected 0.3s ease-out;
+}
