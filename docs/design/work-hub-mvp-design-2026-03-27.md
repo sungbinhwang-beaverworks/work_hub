@@ -822,12 +822,12 @@ export async function POST(req: NextRequest) {
 
 ```
 # Gemini (beaver_chat_bot과 동일 키 공유)
-GEMINI_API_KEY=AIzaSyCom4pOoYdvyYKKYJ9FQcfYGTDmBo4qVMs
+GEMINI_API_KEY=your_gemini_api_key
 
 # Supabase (beaver_chat_bot과 동일 프로젝트, hub_ 테이블 사용)
-NEXT_PUBLIC_SUPABASE_URL=https://djcxrsokvqjbdwyhrxbo.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_q8D4nMu9alQaowTxPFi3Ig_MeiB7kEv
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_CI31rgzW8OHalyihcRIgpQ_eUtLb3_8
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
 ---
