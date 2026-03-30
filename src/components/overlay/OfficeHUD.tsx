@@ -136,7 +136,7 @@ export default function OfficeHUD({ agents, pipelineStatus, onToggleActivityLog 
         </>
       )}
 
-      {/* 활동 로그 버튼 */}
+      {/* 활동 패널 버튼 */}
       <span style={{ width: 1, height: 16, backgroundColor: "var(--color-divider)" }} />
       <button
         type="button"
@@ -148,9 +148,25 @@ export default function OfficeHUD({ agents, pipelineStatus, onToggleActivityLog 
           fontSize: "var(--fs-xs)",
           color: "var(--color-typo-subtitle)",
           padding: 0,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+          position: "relative",
         }}
       >
-        📋 로그
+        📋 활동
+        {/* 진행 중 파이프라인 있으면 녹색 점 */}
+        {pipelineStatus && !['idle', 'completed', 'error', 'timeout'].includes(pipelineStatus.status) && (
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: "var(--color-status-working)",
+              display: "inline-block",
+            }}
+          />
+        )}
       </button>
     </div>
   );

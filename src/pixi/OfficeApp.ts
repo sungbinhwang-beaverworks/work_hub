@@ -2,7 +2,13 @@ import * as PIXI from 'pixi.js';
 import { App } from './App';
 import { AgentCharacter } from './AgentCharacter';
 import { AGENT_SPAWNS, TILE_SIZE, MAP_COLS, MAP_ROWS } from '@/config/office_map';
-import type { AgentInfo } from '@/lib/agents/types';
+import {
+  PIPELINE_STEP_AGENT,
+  PIPELINE_STEP_BUBBLE,
+  PIPELINE_STEP_DURATION,
+  interMessageToBubble,
+} from '@/config/pipeline_visual';
+import type { AgentInfo, InterAgentMessage, PipelineStatus } from '@/lib/agents/types';
 
 /**
  * OfficeApp -- App 상속. 카메라, 에이전트 캐릭터 관리, 클릭 이벤트.
@@ -216,6 +222,53 @@ export class OfficeApp extends App {
     this.app.stage.hitArea = this.app.screen;
     this.centerCamera();
   };
+
+  /**
+   * 파이프라인 상태 전환 시 담당 에이전트에 말풍선 표시
+   */
+  public showPipelineBubble(status: PipelineStatus) {
+    const agentId = PIPELINE_STEP_AGENT[status];
+    if (!agentId) return;
+
+    const text = PIPELINE_STEP_BUBBLE[status];
+    if (!text) return;
+
+    const char = this.characters.get(agentId);
+    if (!char) return;
+
+    const duration = PIPELINE_STEP_DURATION[status] ?? 6000;
+    // pipeline 말풍선은 우선순위가 낮으므로 idle일 때만 표시
+    char.showMessageIfIdle(text, duration);
+  }
+
+  /**
+   * 에이전트 간 메시지 수신 시 양쪽 캐릭터에 말풍선 표시
+   */
+  public showInterMessageBubble(msg: InterAgentMessage) {
+    const fromChar = this.characters.get(msg.from_agent);
+    const toChar = this.characters.get(msg.to_agent);
+
+    if (fromChar) {
+      const text = interMessageToBubble(
+        msg.type,
+        msg.payload as Record<string, string | undefined>,
+        true,
+      );
+      if (text) fromChar.showMessage(text, 5000);
+    }
+
+    // 수신 측은 약간 딜레이 (전달 느낌)
+    if (toChar) {
+      setTimeout(() => {
+        const text = interMessageToBubble(
+          msg.type,
+          msg.payload as Record<string, string | undefined>,
+          false,
+        );
+        if (text) toChar.showMessage(text, 6000);
+      }, 800);
+    }
+  }
 
   public override destroy() {
     PIXI.Ticker.shared.remove(this.onTick);

@@ -86,11 +86,23 @@ export async function runPipeline(params: {
       });
 
       // LLM 호출 (타임아웃 + 재시도)
-      const result = await executeWithTimeout(
+      let result = await executeWithTimeout(
         () => runAgentComplete({ agent, message: prompt, history: [] }),
         step.timeout_ms,
         MAX_RETRY,
       );
+
+      // 빈 응답 체크 — 공백만 있는 응답은 재시도
+      if (!result || result.trim().length < 50) {
+        result = await executeWithTimeout(
+          () => runAgentComplete({ agent, message: prompt + '\n\n위 내용을 반드시 분석하고 구체적인 결과를 작성해주세요.', history: [] }),
+          step.timeout_ms,
+          0, // 재시도 없이 1회만
+        );
+        if (!result || result.trim().length < 50) {
+          throw new Error(`${step.agent_id} 에이전트가 유효한 응답을 생성하지 못했습니다 (E-02)`);
+        }
+      }
 
       // 결과 저장 (마크다운 파일)
       const outputPath = await saveResult({
@@ -257,9 +269,12 @@ async function buildStepPrompt(params: {
     parts.push('=== 선행 에이전트 결과 ===');
     for (const msg of previousMessages) {
       if (msg.result_path) {
-        // 결과 파일 내용을 직접 읽어서 첨부
+        // 결과 파일 내용을 직접 읽어서 첨부 (너무 길면 잘라서)
         const fsModule = await import('fs');
-        const resultContent = fsModule.readFileSync(msg.result_path, 'utf-8');
+        let resultContent = fsModule.readFileSync(msg.result_path, 'utf-8');
+        if (resultContent.length > 8000) {
+          resultContent = resultContent.slice(0, 8000) + '\n\n... (이하 생략, 전체 내용은 파일 참조)';
+        }
         parts.push(`--- ${msg.result_path} ---`);
         parts.push(resultContent);
         parts.push('');

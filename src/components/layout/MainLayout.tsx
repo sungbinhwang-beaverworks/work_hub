@@ -6,12 +6,22 @@ import dynamic from "next/dynamic";
 const PixiOfficeCanvas = dynamic(() => import("@/components/pixi/PixiOfficeCanvas"), { ssr: false });
 import ChatOverlay from "@/components/overlay/ChatOverlay";
 import OfficeHUD from "@/components/overlay/OfficeHUD";
-import ActivityLog from "@/components/overlay/ActivityLog";
-import PipelineProgress from "@/components/chat/PipelineProgress";
-import type { AgentInfo, ChatMessage, PipelineRecord, InterAgentMessage } from "@/lib/agents/types";
+import ActivityPanel from "@/components/overlay/ActivityPanel";
+import ToastNotification from "@/components/overlay/ToastNotification";
+import type { ToastItem } from "@/components/overlay/ToastNotification";
+import type { AgentInfo, ChatMessage, PipelineRecord, PipelineStatus, InterAgentMessage } from "@/lib/agents/types";
 import type { PipelineTrigger } from "@/lib/agents/pipeline_classifier";
 import { formatInterMessage } from "@/lib/agents/format_inter_message";
 import { supabase } from "@/lib/supabase";
+
+/** 이전 상태 → 단계 한글명 매핑 (토스트 메시지용) */
+const STEP_LABEL: Record<string, string> = {
+  dispatching: "분류",
+  analyzing: "분석",
+  planning: "기획",
+  designing: "설계",
+  completing: "완료",
+};
 
 export default function MainLayout() {
   const [agents, setAgents] = useState<AgentInfo[]>([]);
@@ -21,14 +31,45 @@ export default function MainLayout() {
   const [streamingText, setStreamingText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+  const [isActivityPanelOpen, setIsActivityPanelOpen] = useState(false);
+  const [focusPipelineId, setFocusPipelineId] = useState<string | null>(null);
 
   // 에이전트별 대화 ID 캐시
   const [convCache, setConvCache] = useState<Record<string, string>>({});
-  // 활성 파이프라인 ID (Step 2에서 Realtime 구독에 사용)
+  // 활성 파이프라인 ID (Realtime 구독에 사용)
   const [activePipelineId, setActivePipelineId] = useState<string | null>(null);
   // 파이프라인 상태 (Realtime으로 갱신)
   const [pipelineStatus, setPipelineStatus] = useState<PipelineRecord | null>(null);
+
+  // 캔버스 말풍선용: 최근 에이전트 간 메시지
+  const [lastInterMessage, setLastInterMessage] = useState<InterAgentMessage | null>(null);
+
+  // 토스트 상태
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  // 토스트 추가 (최대 3개, FIFO)
+  const addToast = useCallback((toast: Omit<ToastItem, "id">) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setToasts((prev) => {
+      const next = [{ ...toast, id }, ...prev];
+      // 최대 3개 초과 시 가장 오래된 것 제거
+      if (next.length > 3) {
+        return next.slice(0, 3);
+      }
+      return next;
+    });
+  }, []);
+
+  // 토스트 제거
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // 토스트 액션: 활동 패널 열기 + 해당 항목 포커스
+  const handleToastAction = useCallback((pipelineId: string) => {
+    setFocusPipelineId(pipelineId);
+    setIsActivityPanelOpen(true);
+  }, []);
 
   // 에이전트 목록 로드
   const loadAgents = useCallback(async () => {
@@ -100,31 +141,104 @@ export default function MainLayout() {
     }, 3000);
   }, [conversationId]);
 
-  // Supabase Realtime: 새 파이프라인 감지 (외부 트리거 대응)
+  // Supabase Realtime: 토스트용 파이프라인 구독 (패널 열림 여부와 무관하게 항상 동작)
   useEffect(() => {
-    const newPipelineChannel = supabase
-      .channel("new_pipelines")
+    // 이전 상태를 추적하기 위한 맵
+    const prevStatusMap: Record<string, PipelineStatus> = {};
+
+    const toastChannel = supabase
+      .channel("toast_pipeline_events")
       .on(
         "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "hub_pipelines",
-        },
+        { event: "INSERT", schema: "public", table: "hub_pipelines" },
         (payload) => {
           const newPipeline = payload.new as PipelineRecord;
+          const task = newPipeline.trigger_data?.task?.slice(0, 40) || "";
+          prevStatusMap[newPipeline.id] = newPipeline.status;
+
+          // 파이프라인 시작 토스트
+          addToast({
+            type: "info",
+            message: `파이프라인 시작: ${task}`,
+            autoDismissMs: 4000,
+          });
+
+          // 활성 파이프라인 추적
           setActivePipelineId(newPipeline.id);
           setPipelineStatus(newPipeline);
+
+          // 진행 중 파이프라인 감지 시 자동으로 활동 패널 열기
+          setIsActivityPanelOpen(true);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "hub_pipelines" },
+        (payload) => {
+          const updated = payload.new as PipelineRecord;
+          const prevStatus = prevStatusMap[updated.id];
+          prevStatusMap[updated.id] = updated.status;
+
+          const task = updated.trigger_data?.task?.slice(0, 40) || "";
+
+          // 토스트 유형 결정
+          if (updated.status === "completed") {
+            addToast({
+              type: "success",
+              message: `파이프라인 완료: ${task}`,
+              actionLabel: "결과 보기",
+              actionPipelineId: updated.id,
+              autoDismissMs: 5000,
+            });
+          } else if (updated.status === "error") {
+            const stepLabel = STEP_LABEL[updated.current_step || ""] || updated.current_step || "";
+            addToast({
+              type: "error",
+              message: `파이프라인 오류: ${stepLabel} 실패`,
+              actionLabel: "상세 보기",
+              actionPipelineId: updated.id,
+              autoDismissMs: 0, // 자동 닫힘 안 함
+            });
+          } else if (updated.status === "timeout") {
+            const stepLabel = STEP_LABEL[updated.current_step || ""] || updated.current_step || "";
+            addToast({
+              type: "error",
+              message: `파이프라인 시간 초과: ${stepLabel}`,
+              actionLabel: "상세 보기",
+              actionPipelineId: updated.id,
+              autoDismissMs: 0,
+            });
+          } else if (prevStatus && prevStatus !== updated.status) {
+            // 단계 전환 토스트
+            const prevLabel = STEP_LABEL[prevStatus] || prevStatus;
+            const currentLabel = STEP_LABEL[updated.status] || updated.status;
+            addToast({
+              type: "info",
+              message: `${prevLabel} 완료. ${currentLabel} 시작.`,
+              autoDismissMs: 4000,
+            });
+          }
+
+          // 활성 파이프라인 상태 업데이트
+          setPipelineStatus((prev) => {
+            if (prev && prev.id === updated.id) return updated;
+            return prev;
+          });
+
+          // 완료/에러/타임아웃 시 채팅에 알림
+          if (['completed', 'error', 'timeout'].includes(updated.status)) {
+            handlePipelineEnd(updated);
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(newPipelineChannel);
+      supabase.removeChannel(toastChannel);
     };
-  }, []);
+  }, [addToast, handlePipelineEnd]);
 
-  // Supabase Realtime: hub_pipelines UPDATE + hub_inter_messages 구독
+  // Supabase Realtime: hub_inter_messages 구독 (채팅 시스템 메시지용)
   useEffect(() => {
     if (!activePipelineId) return;
 
@@ -136,27 +250,7 @@ export default function MainLayout() {
       });
 
     const channel = supabase
-      .channel(`pipeline_${activePipelineId}`)
-      // hub_pipelines UPDATE 구독
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "hub_pipelines",
-          filter: `id=eq.${activePipelineId}`,
-        },
-        (payload) => {
-          const updated = payload.new as PipelineRecord;
-          setPipelineStatus(updated);
-
-          // 완료/에러/타임아웃 시 알림
-          if (['completed', 'error', 'timeout'].includes(updated.status)) {
-            handlePipelineEnd(updated);
-          }
-        }
-      )
-      // hub_inter_messages INSERT 구독
+      .channel(`pipeline_messages_${activePipelineId}`)
       .on(
         "postgres_changes",
         {
@@ -175,6 +269,8 @@ export default function MainLayout() {
             created_at: msg.created_at,
           };
           setMessages(prev => [...prev, systemMessage]);
+          // 캔버스 말풍선용
+          setLastInterMessage(msg);
         }
       )
       .subscribe();
@@ -182,7 +278,7 @@ export default function MainLayout() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [activePipelineId, conversationId, handlePipelineEnd]);
+  }, [activePipelineId, conversationId]);
 
   // 에이전트 선택 시 대화 로드
   const handleSelectAgent = useCallback(
@@ -384,39 +480,30 @@ export default function MainLayout() {
         agents={agents}
         selectedAgentId={selectedAgentId}
         onSelectAgent={handleSelectAgent}
+        pipelineStatus={pipelineStatus}
+        lastInterMessage={lastInterMessage}
       />
 
       {/* HUD 오버레이 */}
       <OfficeHUD
         agents={agents}
         pipelineStatus={pipelineStatus}
-        onToggleActivityLog={() => setIsActivityLogOpen(prev => !prev)}
+        onToggleActivityLog={() => setIsActivityPanelOpen(prev => !prev)}
       />
 
-      {/* 활동 로그 */}
-      <ActivityLog isOpen={isActivityLogOpen} onClose={() => setIsActivityLogOpen(false)} />
+      {/* 활동 패널 (기존 ActivityLog + ActivityDetailModal + PipelineProgress 대체) */}
+      <ActivityPanel
+        isOpen={isActivityPanelOpen}
+        onClose={() => setIsActivityPanelOpen(false)}
+        focusPipelineId={focusPipelineId}
+      />
 
-      {/* 파이프라인 진행 패널 (메인 화면, 채팅 없이도 보임) */}
-      {pipelineStatus && !['idle'].includes(pipelineStatus.status) && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 24,
-            left: 24,
-            width: 320,
-            zIndex: 60,
-            backgroundColor: "rgba(255, 255, 255, 0.92)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            borderRadius: "var(--radius-xl)",
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.6)",
-            overflow: "hidden",
-          }}
-        >
-          <PipelineProgress pipeline={pipelineStatus} />
-        </div>
-      )}
+      {/* 토스트 알림 (우상단, 항상 렌더링) */}
+      <ToastNotification
+        toasts={toasts}
+        onDismiss={dismissToast}
+        onAction={handleToastAction}
+      />
 
       {/* 채팅 오버레이 (개입용) */}
       {isChatOpen && selectedAgent && (

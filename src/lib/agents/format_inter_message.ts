@@ -7,24 +7,32 @@ const AGENT_NAMES: Record<string, string> = {
   architect: '설계자',
 };
 
+/** 로그용 한 줄 요약 */
 export function formatInterMessage(msg: InterAgentMessage): string {
   const from = AGENT_NAMES[msg.from_agent] || msg.from_agent;
   const to = AGENT_NAMES[msg.to_agent] || msg.to_agent;
 
   switch (msg.type) {
     case 'task_assignment':
-      return `[SYSTEM] ${from}이(가) ${to}에게 업무를 전달했습니다: ${msg.payload.task || ''}`;
+      return `${from} → ${to}: 업무 전달`;
     case 'handoff':
-      return `[SYSTEM] ${from}이(가) ${to}에게 결과를 넘겼습니다. ${msg.payload.summary || ''}`;
+      return `${from} → ${to}: 결과 전달`;
     case 'clarification_request':
-      return `[SYSTEM] ${from}이(가) ${to}에게 보충 질문: ${msg.payload.question || ''}`;
+      return `${from} → ${to}: 보충 질문`;
     case 'clarification_response':
-      return `[SYSTEM] ${from}이(가) 보충 답변을 보냈습니다.`;
+      return `${from} → ${to}: 보충 답변`;
     case 'completion_report':
-      return `[SYSTEM] ${from}이(가) 완료를 보고했습니다. ${msg.payload.summary || ''}`;
+      return `${from}: 완료 보고`;
     case 'error_report':
-      return `[SYSTEM] ${from}에서 오류 발생: ${msg.payload.error || ''}`;
+      return `${from}: 오류 발생`;
     default:
-      return `[SYSTEM] ${from} -> ${to}: ${msg.type}`;
+      return `${from} → ${to}`;
   }
+}
+
+/** 상세 보기용 — 산출물 파일명 추출 */
+export function getResultFileName(msg: InterAgentMessage): string | null {
+  const path = msg.payload?.result_path;
+  if (!path) return null;
+  return (path as string).split('/').pop() || null;
 }

@@ -74,8 +74,12 @@ export class AgentCharacter {
   private shadowGraphics: PIXI.Graphics = new PIXI.Graphics();
   private emojiText: PIXI.Text;
   private nameText: PIXI.Text;
-  private messageText: PIXI.Text | null = null;
+  private bubbleContainer: PIXI.Container | null = null;
   private messageTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // 말풍선 페이드아웃용
+  private bubbleDuration = 0;
+  private bubbleCreatedAt = 0;
 
   private isSelected = false;
   private selectionRing: PIXI.Graphics = new PIXI.Graphics();
@@ -216,6 +220,7 @@ export class AgentCharacter {
    * 에이전트 상태 업데이트 (idle/working/error)
    */
   public updateStatus(status: 'idle' | 'working' | 'error') {
+    this.agentInfo.status = status;
     this.drawStatusRing(status);
   }
 
@@ -228,20 +233,21 @@ export class AgentCharacter {
   }
 
   /**
-   * 말풍선 표시
+   * 말풍선 표시 (배경 + 꼬리 + 그림자 포함)
    */
   public showMessage(text: string, durationMs = 5000) {
     // 기존 말풍선 제거
-    if (this.messageTimeout) {
-      clearTimeout(this.messageTimeout);
-    }
-    if (this.messageText) {
-      this.parent.removeChild(this.messageText);
-      this.messageText = null;
-    }
+    this.clearBubble();
 
     const formatted = formatText(text, 30);
-    this.messageText = new PIXI.Text({
+    const padX = 6;
+    const padY = 4;
+    const tailHeight = 5;
+    const tailBase = 8;
+    const cornerRadius = 6;
+
+    // 텍스트 생성
+    const bubbleText = new PIXI.Text({
       text: formatted,
       style: {
         fontFamily: 'Arial, sans-serif',
@@ -252,20 +258,80 @@ export class AgentCharacter {
         wordWrapWidth: 120,
       },
     });
-    this.messageText.anchor.set(0.5, 1);
-    this.messageText.position.set(0, -30);
-    this.parent.addChild(this.messageText);
+    // 텍스트 크기 측정
+    const textW = bubbleText.width;
+    const textH = bubbleText.height;
+    const bgW = textW + padX * 2;
+    const bgH = textH + padY * 2;
+
+    // 컨테이너
+    const container = new PIXI.Container();
+
+    // 그림자 (약간 오프셋)
+    const shadow = new PIXI.Graphics();
+    shadow.roundRect(-bgW / 2 + 1, -bgH + 2, bgW, bgH, cornerRadius);
+    shadow.fill({ color: 0x000000, alpha: 0.08 });
+    container.addChild(shadow);
+
+    // 배경
+    const bg = new PIXI.Graphics();
+    bg.roundRect(-bgW / 2, -bgH, bgW, bgH, cornerRadius);
+    bg.fill({ color: 0xFFFFFF, alpha: 0.95 });
+    bg.stroke({ width: 1, color: 0xE2E8F0, alpha: 1 });
+    container.addChild(bg);
+
+    // 꼬리 (삼각형, 하단 중앙)
+    const tail = new PIXI.Graphics();
+    tail.moveTo(-tailBase / 2, 0);
+    tail.lineTo(0, tailHeight);
+    tail.lineTo(tailBase / 2, 0);
+    tail.closePath();
+    tail.fill({ color: 0xFFFFFF, alpha: 0.95 });
+    container.addChild(tail);
+
+    // 텍스트 배치 (배경 내부 중앙)
+    bubbleText.anchor.set(0.5, 1);
+    bubbleText.position.set(0, -padY);
+    container.addChild(bubbleText);
+
+    // 컨테이너 위치: 캐릭터 위
+    container.position.set(0, -36);
+    this.parent.addChild(container);
+
+    this.bubbleContainer = container;
+    this.bubbleDuration = durationMs;
+    this.bubbleCreatedAt = Date.now();
 
     this.messageTimeout = setTimeout(() => {
-      if (this.messageText) {
-        this.parent.removeChild(this.messageText);
-        this.messageText = null;
-      }
+      this.clearBubble();
     }, durationMs);
   }
 
   /**
-   * Ticker 콜백: 상태 펄스 애니메이션
+   * 기존 말풍선이 있으면 무시하고, 없을 때만 표시
+   */
+  public showMessageIfIdle(text: string, durationMs = 5000) {
+    if (this.bubbleContainer) return;
+    this.showMessage(text, durationMs);
+  }
+
+  /**
+   * 말풍선 제거
+   */
+  private clearBubble() {
+    if (this.messageTimeout) {
+      clearTimeout(this.messageTimeout);
+      this.messageTimeout = null;
+    }
+    if (this.bubbleContainer) {
+      this.parent.removeChild(this.bubbleContainer);
+      this.bubbleContainer.destroy({ children: true });
+      this.bubbleContainer = null;
+    }
+  }
+
+  /**
+   * Ticker 콜백: 상태 펄스 애니메이션 + 말풍선 페이드아웃
    */
   public tick(deltaTime: number) {
     this.pulsePhase += deltaTime * 0.03;
@@ -282,12 +348,19 @@ export class AgentCharacter {
       const alpha = 0.3 + Math.sin(this.pulsePhase * 2) * 0.15;
       this.selectionRing.alpha = alpha;
     }
+
+    // 말풍선 페이드아웃 (마지막 500ms)
+    if (this.bubbleContainer) {
+      const elapsed = Date.now() - this.bubbleCreatedAt;
+      const remaining = this.bubbleDuration - elapsed;
+      if (remaining < 500 && remaining > 0) {
+        this.bubbleContainer.alpha = remaining / 500;
+      }
+    }
   }
 
   public destroy() {
-    if (this.messageTimeout) {
-      clearTimeout(this.messageTimeout);
-    }
+    this.clearBubble();
     this.parent.destroy({ children: true });
   }
 }
