@@ -57,6 +57,7 @@ export default function ChatPanel({
             content={msg.content}
             agentEmoji={agent.emoji}
             agentName={agent.name}
+            isSystemMessage={msg.id.startsWith("system-")}
           />
         ))}
 

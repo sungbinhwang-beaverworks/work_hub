@@ -82,6 +82,12 @@ html, body {
   }
 }
 
+/* 스피너 (PipelineProgress 현재 단계) */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* PixiJS canvas */
 canvas {
   display: block;

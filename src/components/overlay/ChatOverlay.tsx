@@ -129,7 +129,7 @@ export default function ChatOverlay({
       </div>
 
       {/* 채팅 본문 */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
         <ChatPanel
           agent={agent}
           messages={messages}

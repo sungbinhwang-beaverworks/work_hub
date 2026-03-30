@@ -7,6 +7,7 @@ interface MessageBubbleProps {
   content: string;
   agentEmoji?: string;
   agentName?: string;
+  isSystemMessage?: boolean;
 }
 
 export default function MessageBubble({
@@ -14,7 +15,25 @@ export default function MessageBubble({
   content,
   agentEmoji,
   agentName,
+  isSystemMessage = false,
 }: MessageBubbleProps) {
+  // 시스템 메시지: 중앙 정렬, 작은 글씨, 연한 색
+  if (isSystemMessage) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "var(--space-2)",
+          color: "var(--color-typo-disabled)",
+          fontSize: "var(--fs-xs)",
+          lineHeight: "var(--lh-normal)",
+        }}
+      >
+        {content.replace("[SYSTEM] ", "")}
+      </div>
+    );
+  }
+
   const isUser = role === "user";
 
   return (

@@ -87,8 +87,19 @@ export async function POST(req: NextRequest) {
           updated_at: new Date().toISOString(),
         }).eq('id', agent_id);
 
+        // 11. 파이프라인 트리거 판단 (manager 에이전트일 때만)
+        let pipelineTrigger = null;
+        if (agent_id === 'manager') {
+          const { classifyForPipeline } = await import('@/lib/agents/pipeline_classifier');
+          pipelineTrigger = classifyForPipeline(message, fullResponse);
+        }
+
         controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ done: true, conversation_id: convId })}\n\n`)
+          encoder.encode(`data: ${JSON.stringify({
+            done: true,
+            conversation_id: convId,
+            pipeline_trigger: pipelineTrigger,
+          })}\n\n`)
         );
         controller.close();
       } catch (err) {

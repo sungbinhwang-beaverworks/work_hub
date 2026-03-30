@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디자인 스펙 — T-order 연동설정 추가</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+:root {
+  --color-primary: #286ef0;
+  --color-primary-100: #eaf1fe;
+  --color-primary-200: #d4e2fc;
+  --color-primary-b800: #132c58;
+  --color-white: #ffffff;
+  --color-gray-1: #f9fafc;
+  --color-gray-2: #eff1f4;
+  --color-gray-3: #e4e6ea;
+  --color-gray-4: #d7dde4;
+  --color-gray-5: #bec1c7;
+  --color-gray-6: #9da0a8;
+  --color-gray-7: #7f828c;
+  --color-gray-8: #5a5e6a;
+  --color-gray-9: #3b3f4a;
+  --color-black: #000000;
+  --color-typo-title: #3b3f4a;
+  --color-typo-subtitle: #5a5e6a;
+  --color-typo-body: #7f828c;
+  --color-typo-disabled: #9da0a8;
+  --color-red: #eb2341;
+  --color-red-dark: #992534;
+  --color-red-light: #ffebee;
+  --color-red-mid: #fc98a7;
+  --color-green: #18a358;
+  --color-green-dark: #1f7343;
+  --color-green-light: #e8f6ef;
+  --color-green-mid: #8cd1ab;
+  --color-warning: #faad14;
+  --font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 28px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family);
+  font-size: var(--fs-md);
+  color: var(--color-typo-title);
+  background: #e8eaed;
+  line-height: 1.6;
+  padding: 48px;
+}
+
+.spec-board { max-width: 1400px; margin: 0 auto; }
+.spec-title { font-size: 36px; font-weight: var(--fw-bold); color: var(--color-primary-b800); margin-bottom: 8px; letter-spacing: -0.5px; }
+.spec-subtitle { font-size: var(--fs-md); color: var(--color-typo-subtitle); margin-bottom: var(--space-10); line-height: 1.8; }
+.spec-subtitle .tag { display: inline-block; padding: 3px 12px; border-radius: var(--radius-sm); background: var(--color-primary); color: var(--color-white); font-size: var(--fs-sm); font-weight: var(--fw-semibold); margin-right: 8px; vertical-align: middle; }
+
+.section-title {
+  font-size: var(--fs-2xl); font-weight: var(--fw-bold); color: var(--color-primary-b800);
+  margin: 56px 0 var(--space-6);
+  padding-bottom: var(--space-3); border-bottom: 2px solid var(--color-primary-b800);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.section-title .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary-b800);
+  color: var(--color-white); font-size: 15px; font-weight: var(--fw-bold);
+}
+
+.annotation-row { display: flex; gap: var(--space-6); margin-bottom: var(--space-6); }
+.annotation-card { flex: 1; background: var(--color-white); border-radius: 10px; padding: var(--space-6); border: 1px solid var(--color-gray-3); box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.annotation-card h4 { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-primary-b800); margin-bottom: var(--space-3); display: flex; align-items: center; gap: 8px; }
+.annotation-card p { font-size: var(--fs-md); color: var(--color-typo-subtitle); line-height: 1.8; }
+.annotation-card .highlight { color: var(--color-primary); font-weight: var(--fw-bold); }
+
+.callout { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--color-primary); color: var(--color-white); font-size: 12px; font-weight: var(--fw-bold); flex-shrink: 0; }
+.callout.green { background: var(--color-green); }
+.callout.red { background: var(--color-red); }
+.callout.orange { background: var(--color-warning); }
+
+.problem-card { padding: var(--space-5) var(--space-6); border-radius: var(--radius-lg); font-size: var(--fs-md); line-height: 1.8; margin-bottom: 16px; }
+.problem-card.problem { background: var(--color-red-light); border: 1px solid var(--color-red-mid); }
+.problem-card.solution { background: var(--color-green-light); border: 1px solid var(--color-green-mid); }
+.problem-card strong { display: block; margin-bottom: var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-bold); }
+
+.frame { background: var(--color-white); border-radius: var(--radius-xl); border: 1px solid var(--color-gray-4); box-shadow: 0 2px 12px rgba(0,0,0,.06); overflow: hidden; margin-bottom: var(--space-6); }
+.frame-label { padding: 14px var(--space-5); background: #f5f6f8; border-bottom: 1px solid var(--color-gray-3); font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-typo-title); }
+
+.field-table { width: 100%; border-collapse: collapse; }
+.field-table th { background: #f5f6f8; color: var(--color-typo-subtitle); padding: 14px var(--space-4); font-size: var(--fs-md); font-weight: var(--fw-semibold); text-align: left; border-bottom: 1px solid var(--color-gray-3); }
+.field-table td { padding: 12px var(--space-4); border-bottom: 1px solid #f2f4f6; font-size: var(--fs-md); line-height: 1.6; }
+.field-table tr:last-child td { border-bottom: none; }
+.field-table .fn { font-weight: var(--fw-bold); color: var(--color-typo-title); }
+.field-table .ft { color: var(--color-typo-body); }
+.field-table .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3.5px 8px; border-radius: var(--radius-sm); font-size: var(--fs-xs); font-weight: var(--fw-regular); line-height: 1.5; white-space: nowrap; }
+.field-table .tag--primary { background: var(--color-primary-100); border: 1px solid var(--color-primary-200); color: var(--color-primary); }
+.field-table .tag--green { background: var(--color-green-light); border: 1px solid var(--color-green-mid); color: var(--color-green-dark); }
+.field-table .tag--gray { background: var(--color-gray-1); border: 1px solid var(--color-gray-3); color: var(--color-black); }
+
+.spec-divider { border: none; border-top: 1px dashed var(--color-gray-4); margin: var(--space-10) 0; }
+</style>
+</head>
+<body>
+<div class="spec-board">
+
+  <div class="spec-title">T-order 연동설정 추가</div>
+  <div class="spec-subtitle">
+    <span class="tag">티오더</span>
+    적용 위치: 매장관리 &gt; 매장운영설정 &gt; 매장연동 정보 &gt; <b>외부연동 현황</b> &nbsp;|&nbsp;
+    마감: 2026-04-01 &nbsp;|&nbsp;
+    외부연동번호: <b>11403</b> &nbsp;|&nbsp;
+    아사나: 티오더 연동개발
+  </div>
+
+  <!-- ─── Section 1: 배경 및 현황 ─── -->
+  <div class="section-title"><span class="num">1</span> 배경 및 현황</div>
+
+  <!-- 이슈 발단 경위 -->
+  <div class="frame" style="margin-bottom: var(--space-6);">
+    <div class="frame-label">이슈 발단 경위</div>
+    <div style="padding: var(--space-5);">
+      <table class="field-table">
+        <thead><tr><th style="width:200px; white-space:nowrap;">일시 / 담당</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fn">2025.10<br><span class="ft">--</span></td>
+            <td>티오더 연동개발 아사나 등록. 더본 티오더 사용 매장에서 비버 포스 교체 시 서버 to 서버 연동 필요.</td>
+          </tr>
+          <tr>
+            <td class="fn">2025.12.24<br><span class="ft">유영웅 (개발본부)</span></td>
+            <td>NDA 협정 후 티오더와 연동 개발 시작.</td>
+          </tr>
+          <tr>
+            <td class="fn">2026.03.24<br><span class="ft">소준석 / 이덕철</span></td>
+            <td><b>카테고리 그룹 추가 배포완료.</b> T-Order 연동 매장에 카테고리그룹 탭 신설 (비버 1depth &rarr; T-Order 2depth 대응).<br><span class="tag tag--green">배포완료</span></td>
+          </tr>
+          <tr>
+            <td class="fn">2026.03.26<br><span class="ft">이상환</span></td>
+            <td>추가 협의 내용 기재:<br>
+              &middot; callback API 방식으로 상품/매출 연동<br>
+              &middot; 상품정보 변경은 <b>별도 버튼</b>으로 진행<br>
+              &middot; 매장 <b>개점/마감 연동 제외</b><br>
+              &middot; 마감 상태에서 주문 인입 시 당일자로 자동개점 + 매출적재
+            </td>
+          </tr>
+          <tr>
+            <td class="fn">2026.03.30<br><span class="ft">김보일</span></td>
+            <td>상품/카테고리/옵션 연동 대응 완료 확인. <b>서버/상품/매출 연동 설정 추가 필요</b>, 기획 얼개 요청.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="annotation-row">
+    <div class="annotation-card" style="border-color: var(--color-warning);">
+      <h4><span class="callout orange">!</span> 현재 상태</h4>
+      <p>
+        외부연동번호 <span class="highlight">11403</span>으로 티오더가 등록되어 있으나,<br>
+        공통코드 분기가 없어 <b>연동설정 버튼</b>과 <b>상품연동 버튼</b>이 표시되지 않는다.<br>
+        StoreInterfaceCard.tsx 793줄 <code>else { return &lt;&gt;&lt;/&gt; }</code>에 해당하여 빈 렌더링 상태이다.
+      </p>
+    </div>
+    <div class="annotation-card" style="border-color: var(--color-green-mid);">
+      <h4><span class="callout green">&#10003;</span> 해야 할 것</h4>
+      <p>
+        1. 외부연동 현황 테이블 티오더 행에 <span class="highlight">연동설정 모달</span> 추가<br>
+        2. 외부연동 현황 테이블 티오더 행에 <span class="highlight">상품연동 버튼</span> 추가<br>
+        3. 매장 개점/마감 연동 <b>제외</b> (이상환님 요청)
+      </p>
+    </div>
+  </div>
+
+  <hr class="spec-divider">
+
+  <!-- ─── Section 2: 변경사항 ─── -->
+  <div class="section-title"><span class="num">2</span> 변경사항</div>
+
+  <div class="annotation-row">
+    <div class="annotation-card">
+      <h4><span class="callout">1</span> 연동설정 버튼 + 모달 추가</h4>
+      <p>
+        외부연동 현황 테이블 티오더 행에 <span class="highlight">"연동설정"</span> 버튼을 추가한다.<br>
+        클릭 시 "T-order 연동설정" 모달이 열린다.<br><br>
+        <b>참고 패턴:</b> 식권대장(MealKingSettingModal)<br>
+        API 키 인증형, 장비 매핑 없음, 심플한 2필드 구조.
+      </p>
+    </div>
+    <div class="annotation-card">
+      <h4><span class="callout">2</span> 상품연동 버튼 추가</h4>
+      <p>
+        외부연동 현황 테이블 티오더 행에 <span class="highlight">"상품연동"</span> 버튼을 추가한다.<br>
+        클릭 시 현재 매장의 전체 상품/카테고리 정보를 T-order 서버에 전달한다.<br>
+        모달 없이 바로 동작한다 (기존 etc1='Y' 상품연동 버튼 패턴과 동일).<br><br>
+        <b>참고 패턴:</b> 기존 상품연동 버튼 (useMutationStmExtnlItlokProduct)
+      </p>
+    </div>
+    <div class="annotation-card" style="border-color: var(--color-red-mid);">
+      <h4><span class="callout red">3</span> 매장 개점/마감 연동 제외</h4>
+      <p>
+        이상환님 요청으로 매장 개점/마감 연동은 <b>제외</b>한다.<br>
+        API 명세서에도 TBD 상태이다.<br><br>
+        마감 상태에서 주문 인입 시 당일자로 자동개점되면서 매출이 적재되며,<br>
+        이는 <b>서버 로직</b>으로 처리한다.
+      </p>
+    </div>
+  </div>
+
+  <!-- 모달 입력 항목 테이블 -->
+  <div class="frame" style="margin-bottom: var(--space-6);">
+    <div class="frame-label">T-order 연동설정 모달 -- 입력 항목 정의</div>
+    <div style="padding: var(--space-5);">
+      <table class="field-table">
+        <thead><tr><th style="width:220px;">필드명</th><th style="width:100px;">타입</th><th style="width:60px;">필수</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fn">API Key</td>
+            <td>Input</td>
+            <td><span class="tag tag--primary">Y</span></td>
+            <td>T-order에서 발급받은 api-key. HTTPS 통신 시 헤더 인증에 사용된다.</td>
+          </tr>
+          <tr>
+            <td class="fn">매장 식별 코드 (Store ID)</td>
+            <td>Input</td>
+            <td><span class="tag tag--primary">Y</span></td>
+            <td>T-order 측에서 부여한 매장 코드. 서버 to 서버 연동 시 매장 식별에 사용된다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="frame" style="margin-bottom: var(--space-6);">
+    <div class="frame-label">모달 버튼 구성</div>
+    <div style="padding: var(--space-5);">
+      <table class="field-table">
+        <thead><tr><th style="width:120px;">버튼</th><th style="width:150px;">위치</th><th>동작</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fn">초기화</td>
+            <td>footer 좌측</td>
+            <td>입력값을 초기 상태로 리셋한다.</td>
+          </tr>
+          <tr>
+            <td class="fn">적용</td>
+            <td>footer 우측</td>
+            <td>연동 설정을 저장한다. 필수 항목이 비어있으면 비활성화된다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="spec-divider">
+
+  <!-- ─── Section 3: UI 시안 ─── -->
+  <div class="section-title"><span class="num">3</span> UI 시안 -- 전체 백오피스 레이아웃</div>
+
+  <p style="font-size:var(--fs-md); color:var(--color-typo-subtitle); margin-bottom:var(--space-6); line-height:1.8;">
+    아래는 매장운영설정 페이지의 전체 백오피스 레이아웃이다.<br>
+    "매장연동 정보" Collapse만 열린 상태이며, 티오더 행의 "연동설정" 버튼 클릭 시 열리는 모달을 함께 표시한다.
+  </p>
+
+  <!-- ═══ 전체 백오피스 레이아웃 ═══ -->
+  <div style="border:1px solid var(--color-gray-4); border-radius:var(--radius-xl); overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.06); margin-bottom:var(--space-8);">
+
+    <!-- ── 글로벌 헤더 (64px, #132c58) ── -->
+    <header style="height:64px; background:#132c58; display:flex; align-items:center; justify-content:space-between; padding:0 16px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="color:white; font-size:15px; font-weight:700; letter-spacing:-0.3px;">SK broadband</span>
+        <span style="color:rgba(255,255,255,0.3); font-size:12px;">&times;</span>
+        <span style="color:white; font-size:15px; font-weight:700; letter-spacing:-0.3px;">비버매장연구소</span>
+      </div>
+      <span style="color:white; font-size:var(--fs-sm); font-weight:700;">황성빈 (sungbin.hwang) <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke="currentColor" stroke-width="2"/></svg></span>
+    </header>
+
+    <div style="display:flex; min-height:960px;">
+
+      <!-- ── 사이드바 (200px) ── -->
+      <aside style="width:200px; flex-shrink:0; background:var(--color-white); border-right:1px solid #f0f0f0; font-size:var(--fs-sm); overflow-y:auto;">
+        <!-- 메뉴/즐겨찾기 + 검색 -->
+        <div style="padding:12px 8px 8px; display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px; font-size:var(--fs-sm); font-weight:500; line-height:22px;">
+            <span style="color:#000000;">메뉴</span>
+            <div style="width:1px; height:10px; background:var(--color-gray-3);"></div>
+            <span style="color:#BEC1C7;">즐겨찾기</span>
+          </div>
+          <div style="position:relative;">
+            <input style="width:100%; height:32px; padding:5px 32px 5px 11px; border:1px solid var(--color-gray-4); border-radius:4px; background:var(--color-white); font-size:var(--fs-sm); outline:none; font-family:var(--font-family); box-sizing:border-box;" placeholder="메뉴명 검색">
+            <svg width="14" height="14" fill="none" viewBox="0 0 16 16" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--color-gray-5);"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <!-- 메뉴 아이템 -->
+        <div style="display:flex; flex-direction:column; padding:4px 4px;">
+          <!-- 매출현황 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; gap:8px; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M946.5 505L560.1 118.8l-25.9-25.9a31.5 31.5 0 00-44.4 0L77.5 505a63.9 63.9 0 00-18.8 46c.4 35.2 29.7 63.3 64.9 63.3h42.5V940h691.8V614.3h43.4c17.1 0 33.2-6.7 45.3-18.8a63.6 63.6 0 0018.7-45.3c0-17-6.7-33.1-18.8-45.2z"/></svg>
+            매출현황
+          </div>
+          <!-- 매출관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M864 518H506V160c0-4.4-3.6-8-8-8h-26a398.46 398.46 0 00-282.8 117.1 398.19 398.19 0 00-85.7 127.1A397.61 397.61 0 0072 552a398.46 398.46 0 00117.1 282.8c36.7 36.7 79.5 65.6 127.1 85.7A397.61 397.61 0 00472 952a398.46 398.46 0 00282.8-117.1c36.7-36.7 65.6-79.5 85.7-127.1A397.61 397.61 0 00872 552v-26c0-4.4-3.6-8-8-8z"/></svg> 매출관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 정산관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32z"/></svg> 정산관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 기업관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M917 211.1l-199.2 24c-6.6.8-9.4 8.9-4.7 13.6l59.3 59.3-226 226-101.8-101.7c-6.3-6.3-16.4-6.2-22.6 0L100.3 754.1a8.03 8.03 0 000 11.3l45 45.2c3.1 3.1 8.2 3.1 11.3 0L googl378.5 googl588.8l101.8 101.7c6.3 6.3 16.4 6.2 22.6 0l258.6-258.6 59.3 59.3c4.7 4.7 12.8 1.9 13.6-4.7l24-199.2c.7-5.1-3.7-9.5-8.8-8.8z"/></svg> 기업관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 브랜드관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 00.6 45.3l183.7 179.1L238 840.5a31.95 31.95 0 0046.4 33.7L512 754.9l227.6 119.3c6.3 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z"/></svg> 브랜드관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 제휴사관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M854.4 800.9c.2-.3.5-.6.7-.9C920.6 722.1 960 621.7 960 512s-39.4-210.1-104.8-288c-.2-.3-.5-.6-.7-.9A371.2 371.2 0 00512 64C264.6 64 64 264.6 64 512s200.6 448 448 448a371.2 371.2 0 00342.4-159.1z"/></svg> 제휴사관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+
+          <!-- 구분선 -->
+          <div style="height:1px; background:var(--color-gray-3); margin:4px 0;"></div>
+
+          <!-- 매장관리 (열림) -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M882 272.1V144c0-17.7-14.3-32-32-32H174c-17.7 0-32 14.3-32 32v128.1c-16.7 1-30 14.9-30 31.9v131.7a177 177 0 0014.4 70.4c4.3 10.2 9.6 19.8 15.6 28.9v345c0 17.6 14.3 32 32 32h676c17.7 0 32-14.3 32-32V534a240 240 0 0015.6-28.9c9.5-22.3 14.4-46 14.4-70.4V302.9c0-17-13.3-30.9-30-31.8z"/></svg> 매장관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" style="transform:rotate(180deg);"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- depth2: 매장운영관리 (열림) -->
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            매장운영관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" style="transform:rotate(180deg);"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- depth3 -->
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장정보</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-primary); font-weight:500; cursor:pointer; background:var(--color-primary-100); border-radius:4px;">매장운영설정</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">장비정책설정</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장직원관리</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장콘텐츠관리</div>
+          <div style="padding:8px 12px 8px 48px; color:var(--color-gray-9); cursor:pointer;">매장멤버십관리</div>
+          <!-- depth2: 나머지 메뉴 -->
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            화면관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            매장이벤트관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            예치금관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            테이블&middot;출력물관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            장비관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            매장통계
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <div style="padding:8px 12px 8px 36px; color:var(--color-gray-9); font-weight:500; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            매장정보관리
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+
+          <!-- 구분선 -->
+          <div style="height:1px; background:var(--color-gray-3); margin:4px 0;"></div>
+
+          <!-- 상품관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M160 894c0 17.7 14.3 32 32 32h286V550H160v344zm386 32h286c17.7 0 32-14.3 32-32V550H546v376zm334-616H732.4c13.6-21.4 21.6-46.8 21.6-74 0-76.1-61.9-138-138-138-41.4 0-78.7 18.4-104 47.4-25.3-29-62.6-47.4-104-47.4-76.1 0-138 61.9-138 138 0 27.2 7.9 52.6 21.6 74H144c-17.7 0-32 14.3-32 32v140h366V310h60v200h366V342c0-17.7-14.3-32-32-32z"/></svg> 상품관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 회원·캠페인관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M858.5 763.6a374 374 0 00-80.6-119.5 375.63 375.63 0 00-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 00-80.6 119.5A371.7 371.7 0 00136 901.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C beckma779 652.7 810 725 812 802.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 008-8.2c-1-47.8-10.9-94.3-29.5-138.2z"/></svg> 회원&middot;캠페인관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 스마트주문관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M744 62H280c-35.3 0-64 28.7-64 64v768c0 35.3 28.7 64 64 64h464c35.3 0 64-28.7 64-64V126c0-35.3-28.7-64-64-64z"/></svg> 스마트주문관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 부가서비스 관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M864 144H560c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V160c0-8.8-7.2-16-16-16zm0 400H560c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V560c0-8.8-7.2-16-16-16zM464 144H160c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V160c0-8.8-7.2-16-16-16zm0 400H160c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V560c0-8.8-7.2-16-16-16z"/></svg> 부가서비스 관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 기타서비스관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"/></svg> 기타서비스관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+          <!-- 비버관리 -->
+          <div style="padding:8px 12px; display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-9); font-weight:500; cursor:pointer; border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" fill="var(--color-gray-7)" viewBox="0 0 1024 1024"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm243.7 589.2L512 794 268.3 653.2V370.8L512 230l243.7 140.8v282.4z"/></svg> 비버관리</div>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ── 메인 영역 ── -->
+      <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+        <!-- 탭 카드 -->
+        <div style="display:flex; align-items:flex-end; gap:4px; background:var(--color-white); padding:10px 16px 0;">
+          <div style="padding:8px 16px; font-size:var(--fs-sm); font-weight:var(--fw-medium); background:var(--color-gray-2); color:var(--color-black); border-radius:4px 4px 0 0; display:flex; align-items:center; gap:8px;">매장운영설정 <span style="color:var(--color-gray-6); font-size:10px; cursor:pointer;">&times;</span></div>
+        </div>
+
+        <!-- 컨텐츠 영역 -->
+        <div style="flex:1; background:var(--color-gray-2); padding:24px 34px;">
+          <!-- 브레드크럼 -->
+          <div style="font-size:var(--fs-sm); color:var(--color-gray-8); margin-bottom:16px;">
+            매장관리 <span style="color:var(--color-gray-5);">&gt;</span> 매장운영관리 <span style="color:var(--color-gray-5);">&gt;</span> <span style="color:#132c58;">매장운영설정</span>
+          </div>
+
+          <!-- 매장 선택 영역 -->
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:var(--fs-sm); color:var(--color-gray-8); font-weight:var(--fw-medium); white-space:nowrap;">브랜드</span>
+              <div style="height:40px; width:200px; padding:8px 12px; border:1px solid var(--color-gray-4); border-radius:var(--radius-md); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-7);">
+                선택해주세요
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:var(--fs-sm); color:var(--color-gray-8); font-weight:var(--fw-medium); white-space:nowrap;">매장</span>
+              <div style="height:40px; width:240px; padding:8px 12px; border:1px solid var(--color-gray-4); border-radius:var(--radius-md); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center; justify-content:space-between; color:var(--color-gray-7);">
+                선택해주세요
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-5)" stroke-width="2"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── Collapse 섹션들 ─── -->
+          <!-- 접힌 Collapse: 단체 및 예약 서비스 정보 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">단체 및 예약 서비스 정보</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 기타 제공 서비스 정보 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">기타 제공 서비스 정보</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 포장비 부과 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">포장비 부과 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 컵보증금 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">컵보증금 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 키오스크 일회용품 제공 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">키오스크 일회용품 제공 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 상품 정책 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">상품 정책 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 모바일상품권 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">모바일상품권 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 대기번호 채번 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">대기번호 채번 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 기타 정책 설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">기타 정책 설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+          <!-- ═══ 열린 Collapse: 매장연동 정보 ═══ -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <!-- Collapse Header -->
+            <div style="padding:14px 24px; border-bottom:1px solid var(--color-gray-3); display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">매장연동 정보</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" style="transform:rotate(180deg);"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+            <!-- Collapse Body -->
+            <div style="padding:20px 24px;">
+              <!-- 헤더: 외부연동 현황 + 새로고침/연동추가 버튼 -->
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <span style="font-size:var(--fs-sm); font-weight:var(--fw-medium); color:var(--color-typo-title);">외부연동 현황</span>
+                <div style="display:flex; gap:8px;">
+                  <button style="height:40px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; color:var(--color-gray-9);">새로고침</button>
+                  <button style="height:40px; padding:0 16px; border:none; border-radius:var(--radius-sm); background:var(--color-primary); color:var(--color-white); font-size:var(--fs-sm); font-weight:var(--fw-semibold); font-family:var(--font-family); cursor:pointer;">연동 추가</button>
+                </div>
+              </div>
+
+              <!-- 외부연동 현황 테이블 -->
+              <div style="border:1px solid var(--color-gray-3); border-radius:var(--radius-lg); overflow:hidden;">
+                <table style="width:100%; border-collapse:collapse; font-size:var(--fs-sm);">
+                  <thead>
+                    <tr>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:left; border-bottom:1px solid var(--color-gray-3); white-space:nowrap;">외부연동번호</th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:left; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap;">연동대상</th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:left; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap;">연동기업번호</th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:left; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap;">연동브랜드번호</th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:left; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap;">연동매장번호</th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:center; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap;">연동상태</th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:center; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap; width:80px;"></th>
+                      <th style="background:var(--color-gray-1); color:var(--color-typo-subtitle); font-weight:var(--fw-semibold); padding:12px 14px; text-align:center; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); white-space:nowrap; width:120px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- 로보와이드 -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">4130</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">로보와이드</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">Key 입력</button>
+                      </td>
+                    </tr>
+
+                    <!-- 비플페이(식권) -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">7160</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">비플페이(식권)</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">연동설정</button>
+                      </td>
+                    </tr>
+
+                    <!-- 페이코스마트오더 -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">9113</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">페이코스마트오더</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">연동설정</button>
+                      </td>
+                    </tr>
+
+                    <!-- SKT -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">9269</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">SKT</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;"></td>
+                    </tr>
+
+                    <!-- 올링크전자영수증 -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">11350</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">올링크전자영수증</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">연동설정</button>
+                      </td>
+                    </tr>
+
+                    <!-- OK-POS -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">11395</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">OK-POS</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">연동설정</button>
+                      </td>
+                    </tr>
+
+                    <!-- 도심환급 -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">11397</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">도심환급</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">연동설정</button>
+                      </td>
+                    </tr>
+
+                    <!-- 아스템즈(F&B) -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">11399</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">아스템즈(F&amp;B)</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                          <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">연동설정</button>
+                          <button style="height:32px; width:100px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-xs); font-family:var(--font-family); cursor:pointer;">상품연동</button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- 티오더 행 -->
+                    <tr>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">11403</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);">
+                        <div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-gray-1); font-size:var(--fs-sm); display:flex; align-items:center; color:var(--color-gray-7);">티오더</div>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3);"><div style="height:32px; padding:5px 12px; border:1px solid var(--color-gray-3); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); display:flex; align-items:center;"></div></td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <span style="font-size:var(--fs-sm); color:var(--color-gray-7);">해제</span>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">해제</button>
+                      </td>
+                      <td style="padding:10px 14px; border-bottom:1px solid var(--color-gray-3); border-left:1px solid var(--color-gray-3); text-align:center;">
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                          <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">연동설정</button>
+                          <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; white-space:nowrap;">상품연동</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 접힌 Collapse: 키오스크 전메뉴 영양성분 및 알레르기 유발성분 노출설정 -->
+          <div style="background:var(--color-white); border-radius:var(--radius-lg); border:1px solid var(--color-gray-3); margin-bottom:8px; overflow:hidden;">
+            <div style="padding:14px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <span style="font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--color-black);">키오스크 전메뉴 영양성분 및 알레르기 유발성분 노출설정</span>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="var(--color-gray-7)" stroke-width="2"/></svg>
+            </div>
+          </div>
+
+        </div><!-- /컨텐츠 영역 -->
+      </div><!-- /메인 영역 -->
+    </div>
+  </div><!-- /전체 백오피스 레이아웃 -->
+
+  <!-- ═══ T-order 연동설정 모달 시안 ═══ -->
+  <div style="margin-top:var(--space-6); margin-bottom:var(--space-8);">
+    <div style="position:relative;">
+      <div style="background:rgba(0,0,0,0.45); border-radius:var(--radius-xl); padding:60px; display:flex; align-items:flex-start; justify-content:center; min-height:400px;">
+        <div style="width:580px; background:var(--color-white); border-radius:var(--radius-lg); box-shadow:0 6px 16px rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05); overflow:hidden;">
+          <!-- 모달 헤더 -->
+          <div style="padding:16px 24px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:var(--fs-md); font-weight:var(--fw-semibold); color:var(--color-black);">T-order 연동설정</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="cursor:pointer;">
+              <path d="M1 1L13 13M13 1L1 13" stroke="var(--color-gray-6)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <!-- 모달 바디 -->
+          <div style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:var(--fs-sm); color:var(--color-gray-8);">API Key</span>
+                <span style="color:#ff4d4f; font-weight:var(--fw-bold);">*</span>
+              </div>
+              <input type="text" placeholder="T-order에서 발급받은 API Key를 입력해주세요." style="width:100%; height:40px; padding:8px 12px; border:1px solid var(--color-gray-4); border-radius:var(--radius-md); font-size:var(--fs-sm); font-family:var(--font-family); outline:none; color:var(--color-gray-9); box-sizing:border-box;">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:var(--fs-sm); color:var(--color-gray-8);">매장 식별 코드 (Store ID)</span>
+                <span style="color:#ff4d4f; font-weight:var(--fw-bold);">*</span>
+              </div>
+              <input type="text" placeholder="매장 식별 코드를 입력해주세요." style="width:100%; height:40px; padding:8px 12px; border:1px solid var(--color-gray-4); border-radius:var(--radius-md); font-size:var(--fs-sm); font-family:var(--font-family); outline:none; color:var(--color-gray-9); box-sizing:border-box;">
+            </div>
+          </div>
+          <!-- 모달 푸터 -->
+          <div style="padding:10px 24px; border-top:1px solid #f0f0f0; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
+            <button style="height:32px; padding:0 16px; border:1px solid var(--color-gray-4); border-radius:var(--radius-sm); background:var(--color-white); font-size:var(--fs-sm); font-family:var(--font-family); cursor:pointer; color:var(--color-gray-9);">연동 초기화</button>
+            <button style="height:32px; padding:0 16px; border:none; border-radius:var(--radius-sm); background:var(--color-primary); color:var(--color-white); font-size:var(--fs-sm); font-weight:var(--fw-semibold); font-family:var(--font-family); cursor:pointer;">적용</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="spec-divider">
+
+  <!-- ─── Section 4: 협의 필요 사항 ─── -->
+  <div class="section-title"><span class="num">4</span> 협의 필요 사항</div>
+
+  <div class="frame" style="margin-bottom: var(--space-6);">
+    <div style="padding: var(--space-5);">
+      <table class="field-table">
+        <thead><tr><th style="width:300px;">항목</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fn">상품연동 API 방식</td>
+            <td>상품연동 버튼 클릭 시 기존 상품연동 API를 재사용할 수 있는지, T-order 전용 API가 필요한지</td>
+          </tr>
+          <tr>
+            <td class="fn">연동설정 모달 입력 항목</td>
+            <td>API Key와 Store ID 외에 추가로 필요한 설정 항목이 있는지</td>
+          </tr>
+          <tr>
+            <td class="fn">매출 연동 동작 방식</td>
+            <td>매출 연동(P0401/P0501)은 연동 설정 완료 후 자동으로 동작하는 것인지, 별도 설정이 필요한지</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="spec-divider">
+
+  <!-- 참고 -->
+  <div style="margin-bottom:var(--space-10);">
+    <h3 style="font-size:var(--fs-lg); font-weight:var(--fw-bold); color:var(--color-primary-b800); margin-bottom:var(--space-4);">참고</h3>
+    <div class="frame">
+      <div style="padding: var(--space-5);">
+        <table class="field-table">
+          <tbody>
+            <tr>
+              <td class="fn" style="width:200px;">선행 아사나 (배포완료)</td>
+              <td>카테고리 그룹 추가 -- 기획: 소준석, 개발: 이덕철 (2026-03-24)</td>
+            </tr>
+            <tr>
+              <td class="fn">T-order API 명세서</td>
+              <td>이벤트 API v1.3.0 -- HTTPS POST, JSON, api-key 인증. 8종 이벤트 (P0101~P0501).</td>
+            </tr>
+            <tr>
+              <td class="fn">분석 보고서</td>
+              <td>analysis_store_interface_2026-03-30.md -- 기존 외부연동 모달 18종 전수 분석, 패턴 분류, 개발 체크리스트</td>
+            </tr>
+            <tr>
+              <td class="fn">참고 코드</td>
+              <td>
+                StoreInterfaceCard.tsx -- 외부연동 현황 테이블 + 버튼 분기 로직<br>
+                MealKingSettingModal.tsx -- 식권대장 연동설정 모달 (API 키 인증형, 1순위 참고 대상)<br>
+                BpayLinkModal.tsx -- 비플페이 연동설정 모달 (가맹점 인증형, 2순위 참고 대상)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

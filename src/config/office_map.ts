@@ -149,6 +149,7 @@ export const AGENT_SPAWNS: Record<string, AgentSpawn> = {
   analyst:   { roomId: 'analysis_lab',  tileX: 7, tileY: 4 },
   architect: { roomId: 'design_studio', tileX: 15, tileY: 4 },
   manager:   { roomId: 'control_room',  tileX: 23, tileY: 4 },
+  planner:   { roomId: 'meeting_hall',  tileX: 13, tileY: 15 },
 };
 
 export function getRoomAtTile(x: number, y: number): RoomDef | null {

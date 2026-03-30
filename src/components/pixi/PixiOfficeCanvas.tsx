@@ -18,19 +18,26 @@ export default function PixiOfficeCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<OfficeApp | null>(null);
 
+  const initDone = useRef(false);
+
   // 마운트: PixiJS 앱 생성
   useEffect(() => {
     if (!containerRef.current || appRef.current) return;
 
     const mount = async () => {
       const officeApp = new OfficeApp();
-      appRef.current = officeApp;
 
       await officeApp.init(containerRef.current!);
       containerRef.current!.appendChild(officeApp.getApp().canvas as HTMLCanvasElement);
 
       officeApp.setOnSelectAgent(onSelectAgent);
-      officeApp.spawnAgents(agents);
+      appRef.current = officeApp;
+      initDone.current = true;
+
+      // 마운트 시점에 agents가 이미 있으면 바로 스폰
+      if (agents.length > 0) {
+        officeApp.spawnAgents(agents);
+      }
     };
 
     mount();
@@ -39,6 +46,7 @@ export default function PixiOfficeCanvas({
       if (appRef.current) {
         appRef.current.destroy();
         appRef.current = null;
+        initDone.current = false;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,7 +54,7 @@ export default function PixiOfficeCanvas({
 
   // 에이전트 목록 변경 시 동기화
   useEffect(() => {
-    if (!appRef.current) return;
+    if (!appRef.current || !initDone.current) return;
     appRef.current.spawnAgents(agents);
     appRef.current.updateAgents(agents);
   }, [agents]);

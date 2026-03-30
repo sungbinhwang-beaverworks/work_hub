@@ -37,3 +37,34 @@ export async function runAgent(params: {
 
   return model.generateContentStream(fullPrompt);
 }
+
+// 파이프라인용: 스트리밍 대신 전체 응답을 한 번에 반환
+export async function runAgentComplete(params: {
+  agent: AgentConfig;
+  message: string;
+  history: ChatMessage[];
+}): Promise<string> {
+  const { agent, message, history } = params;
+
+  const historyText = history
+    .slice(-20)
+    .map(m => `${m.role === 'user' ? '사용자' : agent.name}: ${m.content}`)
+    .join('\n');
+
+  const fullPrompt = [
+    agent.system_prompt,
+    '',
+    historyText ? `=== 이전 대화 ===\n${historyText}\n` : '',
+    `사용자: ${message}`,
+  ].filter(Boolean).join('\n');
+
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    generationConfig: {
+      maxOutputTokens: agent.guardrails.max_tokens,
+    },
+  });
+
+  const result = await model.generateContent(fullPrompt);
+  return result.response.text();
+}
